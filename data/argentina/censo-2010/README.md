@@ -4,169 +4,1731 @@ Fuente: elaboración propia en base a datos del INDEC. Censo Nacional de Poblaci
 # Descripcion de {hdf_file}
 Las tablas son indexadas por departamento.
 
-Tabla asistencia_escolar, columnas:
-    - Asiste
-    - Asistió
-    - Nunca asistió
+Tabla edad_cross_escolaridad, columnas:
+    - 10.Asiste
+    - 10.Asistió
+    - 10.Nunca asistió
+    - 100.Asiste
+    - 100.Asistió
+    - 100.Nunca asistió
+    - 101.Asiste
+    - 101.Asistió
+    - 101.Nunca asistió
+    - 102.Asiste
+    - 102.Asistió
+    - 102.Nunca asistió
+    - 103.Asiste
+    - 103.Asistió
+    - 103.Nunca asistió
+    - 104.Asiste
+    - 104.Asistió
+    - 104.Nunca asistió
+    - 105.Asiste
+    - 105.Asistió
+    - 105.Nunca asistió
+    - 106.Asiste
+    - 106.Asistió
+    - 106.Nunca asistió
+    - 107.Asiste
+    - 107.Asistió
+    - 107.Nunca asistió
+    - 108.Asiste
+    - 108.Asistió
+    - 108.Nunca asistió
+    - 109.Asiste
+    - 109.Asistió
+    - 109.Nunca asistió
+    - 11.Asiste
+    - 11.Asistió
+    - 11.Nunca asistió
+    - 110.Asiste
+    - 110.Asistió
+    - 110.Nunca asistió
+    - 12.Asiste
+    - 12.Asistió
+    - 12.Nunca asistió
+    - 13.Asiste
+    - 13.Asistió
+    - 13.Nunca asistió
+    - 14.Asiste
+    - 14.Asistió
+    - 14.Nunca asistió
+    - 15.Asiste
+    - 15.Asistió
+    - 15.Nunca asistió
+    - 16.Asiste
+    - 16.Asistió
+    - 16.Nunca asistió
+    - 17.Asiste
+    - 17.Asistió
+    - 17.Nunca asistió
+    - 18.Asiste
+    - 18.Asistió
+    - 18.Nunca asistió
+    - 19.Asiste
+    - 19.Asistió
+    - 19.Nunca asistió
+    - 20.Asiste
+    - 20.Asistió
+    - 20.Nunca asistió
+    - 21.Asiste
+    - 21.Asistió
+    - 21.Nunca asistió
+    - 22.Asiste
+    - 22.Asistió
+    - 22.Nunca asistió
+    - 23.Asiste
+    - 23.Asistió
+    - 23.Nunca asistió
+    - 24.Asiste
+    - 24.Asistió
+    - 24.Nunca asistió
+    - 25.Asiste
+    - 25.Asistió
+    - 25.Nunca asistió
+    - 26.Asiste
+    - 26.Asistió
+    - 26.Nunca asistió
+    - 27.Asiste
+    - 27.Asistió
+    - 27.Nunca asistió
+    - 28.Asiste
+    - 28.Asistió
+    - 28.Nunca asistió
+    - 29.Asiste
+    - 29.Asistió
+    - 29.Nunca asistió
+    - 3.Asiste
+    - 3.Asistió
+    - 3.Nunca asistió
+    - 30.Asiste
+    - 30.Asistió
+    - 30.Nunca asistió
+    - 31.Asiste
+    - 31.Asistió
+    - 31.Nunca asistió
+    - 32.Asiste
+    - 32.Asistió
+    - 32.Nunca asistió
+    - 33.Asiste
+    - 33.Asistió
+    - 33.Nunca asistió
+    - 34.Asiste
+    - 34.Asistió
+    - 34.Nunca asistió
+    - 35.Asiste
+    - 35.Asistió
+    - 35.Nunca asistió
+    - 36.Asiste
+    - 36.Asistió
+    - 36.Nunca asistió
+    - 37.Asiste
+    - 37.Asistió
+    - 37.Nunca asistió
+    - 38.Asiste
+    - 38.Asistió
+    - 38.Nunca asistió
+    - 39.Asiste
+    - 39.Asistió
+    - 39.Nunca asistió
+    - 4.Asiste
+    - 4.Asistió
+    - 4.Nunca asistió
+    - 40.Asiste
+    - 40.Asistió
+    - 40.Nunca asistió
+    - 41.Asiste
+    - 41.Asistió
+    - 41.Nunca asistió
+    - 42.Asiste
+    - 42.Asistió
+    - 42.Nunca asistió
+    - 43.Asiste
+    - 43.Asistió
+    - 43.Nunca asistió
+    - 44.Asiste
+    - 44.Asistió
+    - 44.Nunca asistió
+    - 45.Asiste
+    - 45.Asistió
+    - 45.Nunca asistió
+    - 46.Asiste
+    - 46.Asistió
+    - 46.Nunca asistió
+    - 47.Asiste
+    - 47.Asistió
+    - 47.Nunca asistió
+    - 48.Asiste
+    - 48.Asistió
+    - 48.Nunca asistió
+    - 49.Asiste
+    - 49.Asistió
+    - 49.Nunca asistió
+    - 5.Asiste
+    - 5.Asistió
+    - 5.Nunca asistió
+    - 50.Asiste
+    - 50.Asistió
+    - 50.Nunca asistió
+    - 51.Asiste
+    - 51.Asistió
+    - 51.Nunca asistió
+    - 52.Asiste
+    - 52.Asistió
+    - 52.Nunca asistió
+    - 53.Asiste
+    - 53.Asistió
+    - 53.Nunca asistió
+    - 54.Asiste
+    - 54.Asistió
+    - 54.Nunca asistió
+    - 55.Asiste
+    - 55.Asistió
+    - 55.Nunca asistió
+    - 56.Asiste
+    - 56.Asistió
+    - 56.Nunca asistió
+    - 57.Asiste
+    - 57.Asistió
+    - 57.Nunca asistió
+    - 58.Asiste
+    - 58.Asistió
+    - 58.Nunca asistió
+    - 59.Asiste
+    - 59.Asistió
+    - 59.Nunca asistió
+    - 6.Asiste
+    - 6.Asistió
+    - 6.Nunca asistió
+    - 60.Asiste
+    - 60.Asistió
+    - 60.Nunca asistió
+    - 61.Asiste
+    - 61.Asistió
+    - 61.Nunca asistió
+    - 62.Asiste
+    - 62.Asistió
+    - 62.Nunca asistió
+    - 63.Asiste
+    - 63.Asistió
+    - 63.Nunca asistió
+    - 64.Asiste
+    - 64.Asistió
+    - 64.Nunca asistió
+    - 65.Asiste
+    - 65.Asistió
+    - 65.Nunca asistió
+    - 66.Asiste
+    - 66.Asistió
+    - 66.Nunca asistió
+    - 67.Asiste
+    - 67.Asistió
+    - 67.Nunca asistió
+    - 68.Asiste
+    - 68.Asistió
+    - 68.Nunca asistió
+    - 69.Asiste
+    - 69.Asistió
+    - 69.Nunca asistió
+    - 7.Asiste
+    - 7.Asistió
+    - 7.Nunca asistió
+    - 70.Asiste
+    - 70.Asistió
+    - 70.Nunca asistió
+    - 71.Asiste
+    - 71.Asistió
+    - 71.Nunca asistió
+    - 72.Asiste
+    - 72.Asistió
+    - 72.Nunca asistió
+    - 73.Asiste
+    - 73.Asistió
+    - 73.Nunca asistió
+    - 74.Asiste
+    - 74.Asistió
+    - 74.Nunca asistió
+    - 75.Asiste
+    - 75.Asistió
+    - 75.Nunca asistió
+    - 76.Asiste
+    - 76.Asistió
+    - 76.Nunca asistió
+    - 77.Asiste
+    - 77.Asistió
+    - 77.Nunca asistió
+    - 78.Asiste
+    - 78.Asistió
+    - 78.Nunca asistió
+    - 79.Asiste
+    - 79.Asistió
+    - 79.Nunca asistió
+    - 8.Asiste
+    - 8.Asistió
+    - 8.Nunca asistió
+    - 80.Asiste
+    - 80.Asistió
+    - 80.Nunca asistió
+    - 81.Asiste
+    - 81.Asistió
+    - 81.Nunca asistió
+    - 82.Asiste
+    - 82.Asistió
+    - 82.Nunca asistió
+    - 83.Asiste
+    - 83.Asistió
+    - 83.Nunca asistió
+    - 84.Asiste
+    - 84.Asistió
+    - 84.Nunca asistió
+    - 85.Asiste
+    - 85.Asistió
+    - 85.Nunca asistió
+    - 86.Asiste
+    - 86.Asistió
+    - 86.Nunca asistió
+    - 87.Asiste
+    - 87.Asistió
+    - 87.Nunca asistió
+    - 88.Asiste
+    - 88.Asistió
+    - 88.Nunca asistió
+    - 89.Asiste
+    - 89.Asistió
+    - 89.Nunca asistió
+    - 9.Asiste
+    - 9.Asistió
+    - 9.Nunca asistió
+    - 90.Asiste
+    - 90.Asistió
+    - 90.Nunca asistió
+    - 91.Asiste
+    - 91.Asistió
+    - 91.Nunca asistió
+    - 92.Asiste
+    - 92.Asistió
+    - 92.Nunca asistió
+    - 93.Asiste
+    - 93.Asistió
+    - 93.Nunca asistió
+    - 94.Asiste
+    - 94.Asistió
+    - 94.Nunca asistió
+    - 95.Asiste
+    - 95.Asistió
+    - 95.Nunca asistió
+    - 96.Asiste
+    - 96.Asistió
+    - 96.Nunca asistió
+    - 97.Asiste
+    - 97.Asistió
+    - 97.Nunca asistió
+    - 98.Asiste
+    - 98.Asistió
+    - 98.Nunca asistió
+    - 99.Asiste
+    - 99.Asistió
+    - 99.Nunca asistió
 
-Tabla convive_en_pareja, columnas:
-    - No
-    - Sí
+Tabla edad_cross_trabaja, columnas:
+    - 100.Desocupado
+    - 100.Inactivo
+    - 100.Ocupado
+    - 101.Desocupado
+    - 101.Inactivo
+    - 101.Ocupado
+    - 102.Desocupado
+    - 102.Inactivo
+    - 102.Ocupado
+    - 103.Desocupado
+    - 103.Inactivo
+    - 103.Ocupado
+    - 104.Desocupado
+    - 104.Inactivo
+    - 104.Ocupado
+    - 105.Desocupado
+    - 105.Inactivo
+    - 105.Ocupado
+    - 106.Desocupado
+    - 106.Inactivo
+    - 106.Ocupado
+    - 107.Desocupado
+    - 107.Inactivo
+    - 107.Ocupado
+    - 108.Desocupado
+    - 108.Inactivo
+    - 108.Ocupado
+    - 109.Desocupado
+    - 109.Inactivo
+    - 109.Ocupado
+    - 110.Desocupado
+    - 110.Inactivo
+    - 110.Ocupado
+    - 14.Desocupado
+    - 14.Inactivo
+    - 14.Ocupado
+    - 15.Desocupado
+    - 15.Inactivo
+    - 15.Ocupado
+    - 16.Desocupado
+    - 16.Inactivo
+    - 16.Ocupado
+    - 17.Desocupado
+    - 17.Inactivo
+    - 17.Ocupado
+    - 18.Desocupado
+    - 18.Inactivo
+    - 18.Ocupado
+    - 19.Desocupado
+    - 19.Inactivo
+    - 19.Ocupado
+    - 20.Desocupado
+    - 20.Inactivo
+    - 20.Ocupado
+    - 21.Desocupado
+    - 21.Inactivo
+    - 21.Ocupado
+    - 22.Desocupado
+    - 22.Inactivo
+    - 22.Ocupado
+    - 23.Desocupado
+    - 23.Inactivo
+    - 23.Ocupado
+    - 24.Desocupado
+    - 24.Inactivo
+    - 24.Ocupado
+    - 25.Desocupado
+    - 25.Inactivo
+    - 25.Ocupado
+    - 26.Desocupado
+    - 26.Inactivo
+    - 26.Ocupado
+    - 27.Desocupado
+    - 27.Inactivo
+    - 27.Ocupado
+    - 28.Desocupado
+    - 28.Inactivo
+    - 28.Ocupado
+    - 29.Desocupado
+    - 29.Inactivo
+    - 29.Ocupado
+    - 30.Desocupado
+    - 30.Inactivo
+    - 30.Ocupado
+    - 31.Desocupado
+    - 31.Inactivo
+    - 31.Ocupado
+    - 32.Desocupado
+    - 32.Inactivo
+    - 32.Ocupado
+    - 33.Desocupado
+    - 33.Inactivo
+    - 33.Ocupado
+    - 34.Desocupado
+    - 34.Inactivo
+    - 34.Ocupado
+    - 35.Desocupado
+    - 35.Inactivo
+    - 35.Ocupado
+    - 36.Desocupado
+    - 36.Inactivo
+    - 36.Ocupado
+    - 37.Desocupado
+    - 37.Inactivo
+    - 37.Ocupado
+    - 38.Desocupado
+    - 38.Inactivo
+    - 38.Ocupado
+    - 39.Desocupado
+    - 39.Inactivo
+    - 39.Ocupado
+    - 40.Desocupado
+    - 40.Inactivo
+    - 40.Ocupado
+    - 41.Desocupado
+    - 41.Inactivo
+    - 41.Ocupado
+    - 42.Desocupado
+    - 42.Inactivo
+    - 42.Ocupado
+    - 43.Desocupado
+    - 43.Inactivo
+    - 43.Ocupado
+    - 44.Desocupado
+    - 44.Inactivo
+    - 44.Ocupado
+    - 45.Desocupado
+    - 45.Inactivo
+    - 45.Ocupado
+    - 46.Desocupado
+    - 46.Inactivo
+    - 46.Ocupado
+    - 47.Desocupado
+    - 47.Inactivo
+    - 47.Ocupado
+    - 48.Desocupado
+    - 48.Inactivo
+    - 48.Ocupado
+    - 49.Desocupado
+    - 49.Inactivo
+    - 49.Ocupado
+    - 50.Desocupado
+    - 50.Inactivo
+    - 50.Ocupado
+    - 51.Desocupado
+    - 51.Inactivo
+    - 51.Ocupado
+    - 52.Desocupado
+    - 52.Inactivo
+    - 52.Ocupado
+    - 53.Desocupado
+    - 53.Inactivo
+    - 53.Ocupado
+    - 54.Desocupado
+    - 54.Inactivo
+    - 54.Ocupado
+    - 55.Desocupado
+    - 55.Inactivo
+    - 55.Ocupado
+    - 56.Desocupado
+    - 56.Inactivo
+    - 56.Ocupado
+    - 57.Desocupado
+    - 57.Inactivo
+    - 57.Ocupado
+    - 58.Desocupado
+    - 58.Inactivo
+    - 58.Ocupado
+    - 59.Desocupado
+    - 59.Inactivo
+    - 59.Ocupado
+    - 60.Desocupado
+    - 60.Inactivo
+    - 60.Ocupado
+    - 61.Desocupado
+    - 61.Inactivo
+    - 61.Ocupado
+    - 62.Desocupado
+    - 62.Inactivo
+    - 62.Ocupado
+    - 63.Desocupado
+    - 63.Inactivo
+    - 63.Ocupado
+    - 64.Desocupado
+    - 64.Inactivo
+    - 64.Ocupado
+    - 65.Desocupado
+    - 65.Inactivo
+    - 65.Ocupado
+    - 66.Desocupado
+    - 66.Inactivo
+    - 66.Ocupado
+    - 67.Desocupado
+    - 67.Inactivo
+    - 67.Ocupado
+    - 68.Desocupado
+    - 68.Inactivo
+    - 68.Ocupado
+    - 69.Desocupado
+    - 69.Inactivo
+    - 69.Ocupado
+    - 70.Desocupado
+    - 70.Inactivo
+    - 70.Ocupado
+    - 71.Desocupado
+    - 71.Inactivo
+    - 71.Ocupado
+    - 72.Desocupado
+    - 72.Inactivo
+    - 72.Ocupado
+    - 73.Desocupado
+    - 73.Inactivo
+    - 73.Ocupado
+    - 74.Desocupado
+    - 74.Inactivo
+    - 74.Ocupado
+    - 75.Desocupado
+    - 75.Inactivo
+    - 75.Ocupado
+    - 76.Desocupado
+    - 76.Inactivo
+    - 76.Ocupado
+    - 77.Desocupado
+    - 77.Inactivo
+    - 77.Ocupado
+    - 78.Desocupado
+    - 78.Inactivo
+    - 78.Ocupado
+    - 79.Desocupado
+    - 79.Inactivo
+    - 79.Ocupado
+    - 80.Desocupado
+    - 80.Inactivo
+    - 80.Ocupado
+    - 81.Desocupado
+    - 81.Inactivo
+    - 81.Ocupado
+    - 82.Desocupado
+    - 82.Inactivo
+    - 82.Ocupado
+    - 83.Desocupado
+    - 83.Inactivo
+    - 83.Ocupado
+    - 84.Desocupado
+    - 84.Inactivo
+    - 84.Ocupado
+    - 85.Desocupado
+    - 85.Inactivo
+    - 85.Ocupado
+    - 86.Desocupado
+    - 86.Inactivo
+    - 86.Ocupado
+    - 87.Desocupado
+    - 87.Inactivo
+    - 87.Ocupado
+    - 88.Desocupado
+    - 88.Inactivo
+    - 88.Ocupado
+    - 89.Desocupado
+    - 89.Inactivo
+    - 89.Ocupado
+    - 90.Desocupado
+    - 90.Inactivo
+    - 90.Ocupado
+    - 91.Desocupado
+    - 91.Inactivo
+    - 91.Ocupado
+    - 92.Desocupado
+    - 92.Inactivo
+    - 92.Ocupado
+    - 93.Desocupado
+    - 93.Inactivo
+    - 93.Ocupado
+    - 94.Desocupado
+    - 94.Inactivo
+    - 94.Ocupado
+    - 95.Desocupado
+    - 95.Inactivo
+    - 95.Ocupado
+    - 96.Desocupado
+    - 96.Inactivo
+    - 96.Ocupado
+    - 97.Desocupado
+    - 97.Inactivo
+    - 97.Ocupado
+    - 98.Desocupado
+    - 98.Inactivo
+    - 98.Ocupado
+    - 99.Desocupado
+    - 99.Inactivo
+    - 99.Ocupado
 
-Tabla edad, columnas:
-    - 0.0
-    - 1.0
-    - 10.0
-    - 100.0
-    - 101.0
-    - 102.0
-    - 103.0
-    - 104.0
-    - 105.0
-    - 106.0
-    - 107.0
-    - 108.0
-    - 109.0
-    - 11.0
-    - 110.0
-    - 12.0
-    - 13.0
-    - 14.0
-    - 15.0
-    - 16.0
-    - 17.0
-    - 18.0
-    - 19.0
-    - 2.0
-    - 20.0
-    - 21.0
-    - 22.0
-    - 23.0
-    - 24.0
-    - 25.0
-    - 26.0
-    - 27.0
-    - 28.0
-    - 29.0
-    - 3.0
-    - 30.0
-    - 31.0
-    - 32.0
-    - 33.0
-    - 34.0
-    - 35.0
-    - 36.0
-    - 37.0
-    - 38.0
-    - 39.0
-    - 4.0
-    - 40.0
-    - 41.0
-    - 42.0
-    - 43.0
-    - 44.0
-    - 45.0
-    - 46.0
-    - 47.0
-    - 48.0
-    - 49.0
-    - 5.0
-    - 50.0
-    - 51.0
-    - 52.0
-    - 53.0
-    - 54.0
-    - 55.0
-    - 56.0
-    - 57.0
-    - 58.0
-    - 59.0
-    - 6.0
-    - 60.0
-    - 61.0
-    - 62.0
-    - 63.0
-    - 64.0
-    - 65.0
-    - 66.0
-    - 67.0
-    - 68.0
-    - 69.0
-    - 7.0
-    - 70.0
-    - 71.0
-    - 72.0
-    - 73.0
-    - 74.0
-    - 75.0
-    - 76.0
-    - 77.0
-    - 78.0
-    - 79.0
-    - 8.0
-    - 80.0
-    - 81.0
-    - 82.0
-    - 83.0
-    - 84.0
-    - 85.0
-    - 86.0
-    - 87.0
-    - 88.0
-    - 89.0
-    - 9.0
-    - 90.0
-    - 91.0
-    - 92.0
-    - 93.0
-    - 94.0
-    - 95.0
-    - 96.0
-    - 97.0
-    - 98.0
-    - 99.0
-
-Tabla parentesco_con_jefe, columnas:
-    - Cónyuge o pareja
-    - Hijo(a) / Hijastro(a)
-    - Jefe(a)
-    - Nieto(a)
-    - Otros familiares
-    - Otros no familiares
-    - Padre / Madre / Suegro(a)
-    - Servicio doméstico y sus familiares
-    - Yerno / Nuera
-
-Tabla parentesco_cross_tamanio_familia, columnas:
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8  y más
-
-Tabla personas_por_hogar, columnas:
-    - 1.0
-    - 2.0
-    - 3.0
-    - 4.0
-    - 5.0
-    - 6.0
-    - 7.0
-    - 8  y más
-
-Tabla sexo, columnas:
-    - Mujer
-    - Varón
-
-Tabla trabaja, columnas:
-    - Desocupado
-    - Inactivo
-    - Ocupado
-
-Tabla urbano_vs_rural, columnas:
+Tabla hogares_urbano_vs_rural, columnas:
     - Rural agrupado
     - Rural disperso
     - Urbano
+
+Tabla parentesco_jefe_cross_edad, columnas:
+    - Cónyuge o pareja.0
+    - Cónyuge o pareja.1
+    - Cónyuge o pareja.10
+    - Cónyuge o pareja.100
+    - Cónyuge o pareja.101
+    - Cónyuge o pareja.102
+    - Cónyuge o pareja.103
+    - Cónyuge o pareja.104
+    - Cónyuge o pareja.105
+    - Cónyuge o pareja.106
+    - Cónyuge o pareja.107
+    - Cónyuge o pareja.108
+    - Cónyuge o pareja.109
+    - Cónyuge o pareja.11
+    - Cónyuge o pareja.110
+    - Cónyuge o pareja.12
+    - Cónyuge o pareja.13
+    - Cónyuge o pareja.14
+    - Cónyuge o pareja.15
+    - Cónyuge o pareja.16
+    - Cónyuge o pareja.17
+    - Cónyuge o pareja.18
+    - Cónyuge o pareja.19
+    - Cónyuge o pareja.2
+    - Cónyuge o pareja.20
+    - Cónyuge o pareja.21
+    - Cónyuge o pareja.22
+    - Cónyuge o pareja.23
+    - Cónyuge o pareja.24
+    - Cónyuge o pareja.25
+    - Cónyuge o pareja.26
+    - Cónyuge o pareja.27
+    - Cónyuge o pareja.28
+    - Cónyuge o pareja.29
+    - Cónyuge o pareja.3
+    - Cónyuge o pareja.30
+    - Cónyuge o pareja.31
+    - Cónyuge o pareja.32
+    - Cónyuge o pareja.33
+    - Cónyuge o pareja.34
+    - Cónyuge o pareja.35
+    - Cónyuge o pareja.36
+    - Cónyuge o pareja.37
+    - Cónyuge o pareja.38
+    - Cónyuge o pareja.39
+    - Cónyuge o pareja.4
+    - Cónyuge o pareja.40
+    - Cónyuge o pareja.41
+    - Cónyuge o pareja.42
+    - Cónyuge o pareja.43
+    - Cónyuge o pareja.44
+    - Cónyuge o pareja.45
+    - Cónyuge o pareja.46
+    - Cónyuge o pareja.47
+    - Cónyuge o pareja.48
+    - Cónyuge o pareja.49
+    - Cónyuge o pareja.5
+    - Cónyuge o pareja.50
+    - Cónyuge o pareja.51
+    - Cónyuge o pareja.52
+    - Cónyuge o pareja.53
+    - Cónyuge o pareja.54
+    - Cónyuge o pareja.55
+    - Cónyuge o pareja.56
+    - Cónyuge o pareja.57
+    - Cónyuge o pareja.58
+    - Cónyuge o pareja.59
+    - Cónyuge o pareja.6
+    - Cónyuge o pareja.60
+    - Cónyuge o pareja.61
+    - Cónyuge o pareja.62
+    - Cónyuge o pareja.63
+    - Cónyuge o pareja.64
+    - Cónyuge o pareja.65
+    - Cónyuge o pareja.66
+    - Cónyuge o pareja.67
+    - Cónyuge o pareja.68
+    - Cónyuge o pareja.69
+    - Cónyuge o pareja.7
+    - Cónyuge o pareja.70
+    - Cónyuge o pareja.71
+    - Cónyuge o pareja.72
+    - Cónyuge o pareja.73
+    - Cónyuge o pareja.74
+    - Cónyuge o pareja.75
+    - Cónyuge o pareja.76
+    - Cónyuge o pareja.77
+    - Cónyuge o pareja.78
+    - Cónyuge o pareja.79
+    - Cónyuge o pareja.8
+    - Cónyuge o pareja.80
+    - Cónyuge o pareja.81
+    - Cónyuge o pareja.82
+    - Cónyuge o pareja.83
+    - Cónyuge o pareja.84
+    - Cónyuge o pareja.85
+    - Cónyuge o pareja.86
+    - Cónyuge o pareja.87
+    - Cónyuge o pareja.88
+    - Cónyuge o pareja.89
+    - Cónyuge o pareja.9
+    - Cónyuge o pareja.90
+    - Cónyuge o pareja.91
+    - Cónyuge o pareja.92
+    - Cónyuge o pareja.93
+    - Cónyuge o pareja.94
+    - Cónyuge o pareja.95
+    - Cónyuge o pareja.96
+    - Cónyuge o pareja.97
+    - Cónyuge o pareja.98
+    - Cónyuge o pareja.99
+    - Hijo(a) / Hijastro(a).0
+    - Hijo(a) / Hijastro(a).1
+    - Hijo(a) / Hijastro(a).10
+    - Hijo(a) / Hijastro(a).100
+    - Hijo(a) / Hijastro(a).101
+    - Hijo(a) / Hijastro(a).102
+    - Hijo(a) / Hijastro(a).103
+    - Hijo(a) / Hijastro(a).104
+    - Hijo(a) / Hijastro(a).105
+    - Hijo(a) / Hijastro(a).106
+    - Hijo(a) / Hijastro(a).107
+    - Hijo(a) / Hijastro(a).108
+    - Hijo(a) / Hijastro(a).109
+    - Hijo(a) / Hijastro(a).11
+    - Hijo(a) / Hijastro(a).110
+    - Hijo(a) / Hijastro(a).12
+    - Hijo(a) / Hijastro(a).13
+    - Hijo(a) / Hijastro(a).14
+    - Hijo(a) / Hijastro(a).15
+    - Hijo(a) / Hijastro(a).16
+    - Hijo(a) / Hijastro(a).17
+    - Hijo(a) / Hijastro(a).18
+    - Hijo(a) / Hijastro(a).19
+    - Hijo(a) / Hijastro(a).2
+    - Hijo(a) / Hijastro(a).20
+    - Hijo(a) / Hijastro(a).21
+    - Hijo(a) / Hijastro(a).22
+    - Hijo(a) / Hijastro(a).23
+    - Hijo(a) / Hijastro(a).24
+    - Hijo(a) / Hijastro(a).25
+    - Hijo(a) / Hijastro(a).26
+    - Hijo(a) / Hijastro(a).27
+    - Hijo(a) / Hijastro(a).28
+    - Hijo(a) / Hijastro(a).29
+    - Hijo(a) / Hijastro(a).3
+    - Hijo(a) / Hijastro(a).30
+    - Hijo(a) / Hijastro(a).31
+    - Hijo(a) / Hijastro(a).32
+    - Hijo(a) / Hijastro(a).33
+    - Hijo(a) / Hijastro(a).34
+    - Hijo(a) / Hijastro(a).35
+    - Hijo(a) / Hijastro(a).36
+    - Hijo(a) / Hijastro(a).37
+    - Hijo(a) / Hijastro(a).38
+    - Hijo(a) / Hijastro(a).39
+    - Hijo(a) / Hijastro(a).4
+    - Hijo(a) / Hijastro(a).40
+    - Hijo(a) / Hijastro(a).41
+    - Hijo(a) / Hijastro(a).42
+    - Hijo(a) / Hijastro(a).43
+    - Hijo(a) / Hijastro(a).44
+    - Hijo(a) / Hijastro(a).45
+    - Hijo(a) / Hijastro(a).46
+    - Hijo(a) / Hijastro(a).47
+    - Hijo(a) / Hijastro(a).48
+    - Hijo(a) / Hijastro(a).49
+    - Hijo(a) / Hijastro(a).5
+    - Hijo(a) / Hijastro(a).50
+    - Hijo(a) / Hijastro(a).51
+    - Hijo(a) / Hijastro(a).52
+    - Hijo(a) / Hijastro(a).53
+    - Hijo(a) / Hijastro(a).54
+    - Hijo(a) / Hijastro(a).55
+    - Hijo(a) / Hijastro(a).56
+    - Hijo(a) / Hijastro(a).57
+    - Hijo(a) / Hijastro(a).58
+    - Hijo(a) / Hijastro(a).59
+    - Hijo(a) / Hijastro(a).6
+    - Hijo(a) / Hijastro(a).60
+    - Hijo(a) / Hijastro(a).61
+    - Hijo(a) / Hijastro(a).62
+    - Hijo(a) / Hijastro(a).63
+    - Hijo(a) / Hijastro(a).64
+    - Hijo(a) / Hijastro(a).65
+    - Hijo(a) / Hijastro(a).66
+    - Hijo(a) / Hijastro(a).67
+    - Hijo(a) / Hijastro(a).68
+    - Hijo(a) / Hijastro(a).69
+    - Hijo(a) / Hijastro(a).7
+    - Hijo(a) / Hijastro(a).70
+    - Hijo(a) / Hijastro(a).71
+    - Hijo(a) / Hijastro(a).72
+    - Hijo(a) / Hijastro(a).73
+    - Hijo(a) / Hijastro(a).74
+    - Hijo(a) / Hijastro(a).75
+    - Hijo(a) / Hijastro(a).76
+    - Hijo(a) / Hijastro(a).77
+    - Hijo(a) / Hijastro(a).78
+    - Hijo(a) / Hijastro(a).79
+    - Hijo(a) / Hijastro(a).8
+    - Hijo(a) / Hijastro(a).80
+    - Hijo(a) / Hijastro(a).81
+    - Hijo(a) / Hijastro(a).82
+    - Hijo(a) / Hijastro(a).83
+    - Hijo(a) / Hijastro(a).84
+    - Hijo(a) / Hijastro(a).85
+    - Hijo(a) / Hijastro(a).86
+    - Hijo(a) / Hijastro(a).87
+    - Hijo(a) / Hijastro(a).88
+    - Hijo(a) / Hijastro(a).89
+    - Hijo(a) / Hijastro(a).9
+    - Hijo(a) / Hijastro(a).90
+    - Hijo(a) / Hijastro(a).91
+    - Hijo(a) / Hijastro(a).92
+    - Hijo(a) / Hijastro(a).93
+    - Hijo(a) / Hijastro(a).94
+    - Hijo(a) / Hijastro(a).95
+    - Hijo(a) / Hijastro(a).96
+    - Hijo(a) / Hijastro(a).97
+    - Hijo(a) / Hijastro(a).98
+    - Hijo(a) / Hijastro(a).99
+    - Jefe(a).0
+    - Jefe(a).1
+    - Jefe(a).10
+    - Jefe(a).100
+    - Jefe(a).101
+    - Jefe(a).102
+    - Jefe(a).103
+    - Jefe(a).104
+    - Jefe(a).105
+    - Jefe(a).106
+    - Jefe(a).107
+    - Jefe(a).108
+    - Jefe(a).109
+    - Jefe(a).11
+    - Jefe(a).110
+    - Jefe(a).12
+    - Jefe(a).13
+    - Jefe(a).14
+    - Jefe(a).15
+    - Jefe(a).16
+    - Jefe(a).17
+    - Jefe(a).18
+    - Jefe(a).19
+    - Jefe(a).2
+    - Jefe(a).20
+    - Jefe(a).21
+    - Jefe(a).22
+    - Jefe(a).23
+    - Jefe(a).24
+    - Jefe(a).25
+    - Jefe(a).26
+    - Jefe(a).27
+    - Jefe(a).28
+    - Jefe(a).29
+    - Jefe(a).3
+    - Jefe(a).30
+    - Jefe(a).31
+    - Jefe(a).32
+    - Jefe(a).33
+    - Jefe(a).34
+    - Jefe(a).35
+    - Jefe(a).36
+    - Jefe(a).37
+    - Jefe(a).38
+    - Jefe(a).39
+    - Jefe(a).4
+    - Jefe(a).40
+    - Jefe(a).41
+    - Jefe(a).42
+    - Jefe(a).43
+    - Jefe(a).44
+    - Jefe(a).45
+    - Jefe(a).46
+    - Jefe(a).47
+    - Jefe(a).48
+    - Jefe(a).49
+    - Jefe(a).5
+    - Jefe(a).50
+    - Jefe(a).51
+    - Jefe(a).52
+    - Jefe(a).53
+    - Jefe(a).54
+    - Jefe(a).55
+    - Jefe(a).56
+    - Jefe(a).57
+    - Jefe(a).58
+    - Jefe(a).59
+    - Jefe(a).6
+    - Jefe(a).60
+    - Jefe(a).61
+    - Jefe(a).62
+    - Jefe(a).63
+    - Jefe(a).64
+    - Jefe(a).65
+    - Jefe(a).66
+    - Jefe(a).67
+    - Jefe(a).68
+    - Jefe(a).69
+    - Jefe(a).7
+    - Jefe(a).70
+    - Jefe(a).71
+    - Jefe(a).72
+    - Jefe(a).73
+    - Jefe(a).74
+    - Jefe(a).75
+    - Jefe(a).76
+    - Jefe(a).77
+    - Jefe(a).78
+    - Jefe(a).79
+    - Jefe(a).8
+    - Jefe(a).80
+    - Jefe(a).81
+    - Jefe(a).82
+    - Jefe(a).83
+    - Jefe(a).84
+    - Jefe(a).85
+    - Jefe(a).86
+    - Jefe(a).87
+    - Jefe(a).88
+    - Jefe(a).89
+    - Jefe(a).9
+    - Jefe(a).90
+    - Jefe(a).91
+    - Jefe(a).92
+    - Jefe(a).93
+    - Jefe(a).94
+    - Jefe(a).95
+    - Jefe(a).96
+    - Jefe(a).97
+    - Jefe(a).98
+    - Jefe(a).99
+    - Nieto(a).0
+    - Nieto(a).1
+    - Nieto(a).10
+    - Nieto(a).100
+    - Nieto(a).101
+    - Nieto(a).102
+    - Nieto(a).103
+    - Nieto(a).104
+    - Nieto(a).105
+    - Nieto(a).106
+    - Nieto(a).107
+    - Nieto(a).108
+    - Nieto(a).109
+    - Nieto(a).11
+    - Nieto(a).110
+    - Nieto(a).12
+    - Nieto(a).13
+    - Nieto(a).14
+    - Nieto(a).15
+    - Nieto(a).16
+    - Nieto(a).17
+    - Nieto(a).18
+    - Nieto(a).19
+    - Nieto(a).2
+    - Nieto(a).20
+    - Nieto(a).21
+    - Nieto(a).22
+    - Nieto(a).23
+    - Nieto(a).24
+    - Nieto(a).25
+    - Nieto(a).26
+    - Nieto(a).27
+    - Nieto(a).28
+    - Nieto(a).29
+    - Nieto(a).3
+    - Nieto(a).30
+    - Nieto(a).31
+    - Nieto(a).32
+    - Nieto(a).33
+    - Nieto(a).34
+    - Nieto(a).35
+    - Nieto(a).36
+    - Nieto(a).37
+    - Nieto(a).38
+    - Nieto(a).39
+    - Nieto(a).4
+    - Nieto(a).40
+    - Nieto(a).41
+    - Nieto(a).42
+    - Nieto(a).43
+    - Nieto(a).44
+    - Nieto(a).45
+    - Nieto(a).46
+    - Nieto(a).47
+    - Nieto(a).48
+    - Nieto(a).49
+    - Nieto(a).5
+    - Nieto(a).50
+    - Nieto(a).51
+    - Nieto(a).52
+    - Nieto(a).53
+    - Nieto(a).54
+    - Nieto(a).55
+    - Nieto(a).56
+    - Nieto(a).57
+    - Nieto(a).58
+    - Nieto(a).59
+    - Nieto(a).6
+    - Nieto(a).60
+    - Nieto(a).61
+    - Nieto(a).62
+    - Nieto(a).63
+    - Nieto(a).64
+    - Nieto(a).65
+    - Nieto(a).66
+    - Nieto(a).67
+    - Nieto(a).68
+    - Nieto(a).69
+    - Nieto(a).7
+    - Nieto(a).70
+    - Nieto(a).71
+    - Nieto(a).72
+    - Nieto(a).73
+    - Nieto(a).74
+    - Nieto(a).75
+    - Nieto(a).76
+    - Nieto(a).77
+    - Nieto(a).78
+    - Nieto(a).79
+    - Nieto(a).8
+    - Nieto(a).80
+    - Nieto(a).81
+    - Nieto(a).82
+    - Nieto(a).83
+    - Nieto(a).84
+    - Nieto(a).85
+    - Nieto(a).86
+    - Nieto(a).87
+    - Nieto(a).88
+    - Nieto(a).89
+    - Nieto(a).9
+    - Nieto(a).90
+    - Nieto(a).91
+    - Nieto(a).92
+    - Nieto(a).93
+    - Nieto(a).94
+    - Nieto(a).95
+    - Nieto(a).96
+    - Nieto(a).97
+    - Nieto(a).98
+    - Nieto(a).99
+    - Otros familiares.0
+    - Otros familiares.1
+    - Otros familiares.10
+    - Otros familiares.100
+    - Otros familiares.101
+    - Otros familiares.102
+    - Otros familiares.103
+    - Otros familiares.104
+    - Otros familiares.105
+    - Otros familiares.106
+    - Otros familiares.107
+    - Otros familiares.108
+    - Otros familiares.109
+    - Otros familiares.11
+    - Otros familiares.110
+    - Otros familiares.12
+    - Otros familiares.13
+    - Otros familiares.14
+    - Otros familiares.15
+    - Otros familiares.16
+    - Otros familiares.17
+    - Otros familiares.18
+    - Otros familiares.19
+    - Otros familiares.2
+    - Otros familiares.20
+    - Otros familiares.21
+    - Otros familiares.22
+    - Otros familiares.23
+    - Otros familiares.24
+    - Otros familiares.25
+    - Otros familiares.26
+    - Otros familiares.27
+    - Otros familiares.28
+    - Otros familiares.29
+    - Otros familiares.3
+    - Otros familiares.30
+    - Otros familiares.31
+    - Otros familiares.32
+    - Otros familiares.33
+    - Otros familiares.34
+    - Otros familiares.35
+    - Otros familiares.36
+    - Otros familiares.37
+    - Otros familiares.38
+    - Otros familiares.39
+    - Otros familiares.4
+    - Otros familiares.40
+    - Otros familiares.41
+    - Otros familiares.42
+    - Otros familiares.43
+    - Otros familiares.44
+    - Otros familiares.45
+    - Otros familiares.46
+    - Otros familiares.47
+    - Otros familiares.48
+    - Otros familiares.49
+    - Otros familiares.5
+    - Otros familiares.50
+    - Otros familiares.51
+    - Otros familiares.52
+    - Otros familiares.53
+    - Otros familiares.54
+    - Otros familiares.55
+    - Otros familiares.56
+    - Otros familiares.57
+    - Otros familiares.58
+    - Otros familiares.59
+    - Otros familiares.6
+    - Otros familiares.60
+    - Otros familiares.61
+    - Otros familiares.62
+    - Otros familiares.63
+    - Otros familiares.64
+    - Otros familiares.65
+    - Otros familiares.66
+    - Otros familiares.67
+    - Otros familiares.68
+    - Otros familiares.69
+    - Otros familiares.7
+    - Otros familiares.70
+    - Otros familiares.71
+    - Otros familiares.72
+    - Otros familiares.73
+    - Otros familiares.74
+    - Otros familiares.75
+    - Otros familiares.76
+    - Otros familiares.77
+    - Otros familiares.78
+    - Otros familiares.79
+    - Otros familiares.8
+    - Otros familiares.80
+    - Otros familiares.81
+    - Otros familiares.82
+    - Otros familiares.83
+    - Otros familiares.84
+    - Otros familiares.85
+    - Otros familiares.86
+    - Otros familiares.87
+    - Otros familiares.88
+    - Otros familiares.89
+    - Otros familiares.9
+    - Otros familiares.90
+    - Otros familiares.91
+    - Otros familiares.92
+    - Otros familiares.93
+    - Otros familiares.94
+    - Otros familiares.95
+    - Otros familiares.96
+    - Otros familiares.97
+    - Otros familiares.98
+    - Otros familiares.99
+    - Otros no familiares.0
+    - Otros no familiares.1
+    - Otros no familiares.10
+    - Otros no familiares.100
+    - Otros no familiares.101
+    - Otros no familiares.102
+    - Otros no familiares.103
+    - Otros no familiares.104
+    - Otros no familiares.105
+    - Otros no familiares.106
+    - Otros no familiares.107
+    - Otros no familiares.108
+    - Otros no familiares.109
+    - Otros no familiares.11
+    - Otros no familiares.110
+    - Otros no familiares.12
+    - Otros no familiares.13
+    - Otros no familiares.14
+    - Otros no familiares.15
+    - Otros no familiares.16
+    - Otros no familiares.17
+    - Otros no familiares.18
+    - Otros no familiares.19
+    - Otros no familiares.2
+    - Otros no familiares.20
+    - Otros no familiares.21
+    - Otros no familiares.22
+    - Otros no familiares.23
+    - Otros no familiares.24
+    - Otros no familiares.25
+    - Otros no familiares.26
+    - Otros no familiares.27
+    - Otros no familiares.28
+    - Otros no familiares.29
+    - Otros no familiares.3
+    - Otros no familiares.30
+    - Otros no familiares.31
+    - Otros no familiares.32
+    - Otros no familiares.33
+    - Otros no familiares.34
+    - Otros no familiares.35
+    - Otros no familiares.36
+    - Otros no familiares.37
+    - Otros no familiares.38
+    - Otros no familiares.39
+    - Otros no familiares.4
+    - Otros no familiares.40
+    - Otros no familiares.41
+    - Otros no familiares.42
+    - Otros no familiares.43
+    - Otros no familiares.44
+    - Otros no familiares.45
+    - Otros no familiares.46
+    - Otros no familiares.47
+    - Otros no familiares.48
+    - Otros no familiares.49
+    - Otros no familiares.5
+    - Otros no familiares.50
+    - Otros no familiares.51
+    - Otros no familiares.52
+    - Otros no familiares.53
+    - Otros no familiares.54
+    - Otros no familiares.55
+    - Otros no familiares.56
+    - Otros no familiares.57
+    - Otros no familiares.58
+    - Otros no familiares.59
+    - Otros no familiares.6
+    - Otros no familiares.60
+    - Otros no familiares.61
+    - Otros no familiares.62
+    - Otros no familiares.63
+    - Otros no familiares.64
+    - Otros no familiares.65
+    - Otros no familiares.66
+    - Otros no familiares.67
+    - Otros no familiares.68
+    - Otros no familiares.69
+    - Otros no familiares.7
+    - Otros no familiares.70
+    - Otros no familiares.71
+    - Otros no familiares.72
+    - Otros no familiares.73
+    - Otros no familiares.74
+    - Otros no familiares.75
+    - Otros no familiares.76
+    - Otros no familiares.77
+    - Otros no familiares.78
+    - Otros no familiares.79
+    - Otros no familiares.8
+    - Otros no familiares.80
+    - Otros no familiares.81
+    - Otros no familiares.82
+    - Otros no familiares.83
+    - Otros no familiares.84
+    - Otros no familiares.85
+    - Otros no familiares.86
+    - Otros no familiares.87
+    - Otros no familiares.88
+    - Otros no familiares.89
+    - Otros no familiares.9
+    - Otros no familiares.90
+    - Otros no familiares.91
+    - Otros no familiares.92
+    - Otros no familiares.93
+    - Otros no familiares.94
+    - Otros no familiares.95
+    - Otros no familiares.96
+    - Otros no familiares.97
+    - Otros no familiares.98
+    - Otros no familiares.99
+    - Padre / Madre / Suegro(a).0
+    - Padre / Madre / Suegro(a).1
+    - Padre / Madre / Suegro(a).10
+    - Padre / Madre / Suegro(a).100
+    - Padre / Madre / Suegro(a).101
+    - Padre / Madre / Suegro(a).102
+    - Padre / Madre / Suegro(a).103
+    - Padre / Madre / Suegro(a).104
+    - Padre / Madre / Suegro(a).105
+    - Padre / Madre / Suegro(a).106
+    - Padre / Madre / Suegro(a).107
+    - Padre / Madre / Suegro(a).108
+    - Padre / Madre / Suegro(a).109
+    - Padre / Madre / Suegro(a).11
+    - Padre / Madre / Suegro(a).110
+    - Padre / Madre / Suegro(a).12
+    - Padre / Madre / Suegro(a).13
+    - Padre / Madre / Suegro(a).14
+    - Padre / Madre / Suegro(a).15
+    - Padre / Madre / Suegro(a).16
+    - Padre / Madre / Suegro(a).17
+    - Padre / Madre / Suegro(a).18
+    - Padre / Madre / Suegro(a).19
+    - Padre / Madre / Suegro(a).2
+    - Padre / Madre / Suegro(a).20
+    - Padre / Madre / Suegro(a).21
+    - Padre / Madre / Suegro(a).22
+    - Padre / Madre / Suegro(a).23
+    - Padre / Madre / Suegro(a).24
+    - Padre / Madre / Suegro(a).25
+    - Padre / Madre / Suegro(a).26
+    - Padre / Madre / Suegro(a).27
+    - Padre / Madre / Suegro(a).28
+    - Padre / Madre / Suegro(a).29
+    - Padre / Madre / Suegro(a).3
+    - Padre / Madre / Suegro(a).30
+    - Padre / Madre / Suegro(a).31
+    - Padre / Madre / Suegro(a).32
+    - Padre / Madre / Suegro(a).33
+    - Padre / Madre / Suegro(a).34
+    - Padre / Madre / Suegro(a).35
+    - Padre / Madre / Suegro(a).36
+    - Padre / Madre / Suegro(a).37
+    - Padre / Madre / Suegro(a).38
+    - Padre / Madre / Suegro(a).39
+    - Padre / Madre / Suegro(a).4
+    - Padre / Madre / Suegro(a).40
+    - Padre / Madre / Suegro(a).41
+    - Padre / Madre / Suegro(a).42
+    - Padre / Madre / Suegro(a).43
+    - Padre / Madre / Suegro(a).44
+    - Padre / Madre / Suegro(a).45
+    - Padre / Madre / Suegro(a).46
+    - Padre / Madre / Suegro(a).47
+    - Padre / Madre / Suegro(a).48
+    - Padre / Madre / Suegro(a).49
+    - Padre / Madre / Suegro(a).5
+    - Padre / Madre / Suegro(a).50
+    - Padre / Madre / Suegro(a).51
+    - Padre / Madre / Suegro(a).52
+    - Padre / Madre / Suegro(a).53
+    - Padre / Madre / Suegro(a).54
+    - Padre / Madre / Suegro(a).55
+    - Padre / Madre / Suegro(a).56
+    - Padre / Madre / Suegro(a).57
+    - Padre / Madre / Suegro(a).58
+    - Padre / Madre / Suegro(a).59
+    - Padre / Madre / Suegro(a).6
+    - Padre / Madre / Suegro(a).60
+    - Padre / Madre / Suegro(a).61
+    - Padre / Madre / Suegro(a).62
+    - Padre / Madre / Suegro(a).63
+    - Padre / Madre / Suegro(a).64
+    - Padre / Madre / Suegro(a).65
+    - Padre / Madre / Suegro(a).66
+    - Padre / Madre / Suegro(a).67
+    - Padre / Madre / Suegro(a).68
+    - Padre / Madre / Suegro(a).69
+    - Padre / Madre / Suegro(a).7
+    - Padre / Madre / Suegro(a).70
+    - Padre / Madre / Suegro(a).71
+    - Padre / Madre / Suegro(a).72
+    - Padre / Madre / Suegro(a).73
+    - Padre / Madre / Suegro(a).74
+    - Padre / Madre / Suegro(a).75
+    - Padre / Madre / Suegro(a).76
+    - Padre / Madre / Suegro(a).77
+    - Padre / Madre / Suegro(a).78
+    - Padre / Madre / Suegro(a).79
+    - Padre / Madre / Suegro(a).8
+    - Padre / Madre / Suegro(a).80
+    - Padre / Madre / Suegro(a).81
+    - Padre / Madre / Suegro(a).82
+    - Padre / Madre / Suegro(a).83
+    - Padre / Madre / Suegro(a).84
+    - Padre / Madre / Suegro(a).85
+    - Padre / Madre / Suegro(a).86
+    - Padre / Madre / Suegro(a).87
+    - Padre / Madre / Suegro(a).88
+    - Padre / Madre / Suegro(a).89
+    - Padre / Madre / Suegro(a).9
+    - Padre / Madre / Suegro(a).90
+    - Padre / Madre / Suegro(a).91
+    - Padre / Madre / Suegro(a).92
+    - Padre / Madre / Suegro(a).93
+    - Padre / Madre / Suegro(a).94
+    - Padre / Madre / Suegro(a).95
+    - Padre / Madre / Suegro(a).96
+    - Padre / Madre / Suegro(a).97
+    - Padre / Madre / Suegro(a).98
+    - Padre / Madre / Suegro(a).99
+    - Servicio doméstico y sus familiares.0
+    - Servicio doméstico y sus familiares.1
+    - Servicio doméstico y sus familiares.10
+    - Servicio doméstico y sus familiares.100
+    - Servicio doméstico y sus familiares.101
+    - Servicio doméstico y sus familiares.102
+    - Servicio doméstico y sus familiares.103
+    - Servicio doméstico y sus familiares.104
+    - Servicio doméstico y sus familiares.105
+    - Servicio doméstico y sus familiares.106
+    - Servicio doméstico y sus familiares.107
+    - Servicio doméstico y sus familiares.108
+    - Servicio doméstico y sus familiares.109
+    - Servicio doméstico y sus familiares.11
+    - Servicio doméstico y sus familiares.110
+    - Servicio doméstico y sus familiares.12
+    - Servicio doméstico y sus familiares.13
+    - Servicio doméstico y sus familiares.14
+    - Servicio doméstico y sus familiares.15
+    - Servicio doméstico y sus familiares.16
+    - Servicio doméstico y sus familiares.17
+    - Servicio doméstico y sus familiares.18
+    - Servicio doméstico y sus familiares.19
+    - Servicio doméstico y sus familiares.2
+    - Servicio doméstico y sus familiares.20
+    - Servicio doméstico y sus familiares.21
+    - Servicio doméstico y sus familiares.22
+    - Servicio doméstico y sus familiares.23
+    - Servicio doméstico y sus familiares.24
+    - Servicio doméstico y sus familiares.25
+    - Servicio doméstico y sus familiares.26
+    - Servicio doméstico y sus familiares.27
+    - Servicio doméstico y sus familiares.28
+    - Servicio doméstico y sus familiares.29
+    - Servicio doméstico y sus familiares.3
+    - Servicio doméstico y sus familiares.30
+    - Servicio doméstico y sus familiares.31
+    - Servicio doméstico y sus familiares.32
+    - Servicio doméstico y sus familiares.33
+    - Servicio doméstico y sus familiares.34
+    - Servicio doméstico y sus familiares.35
+    - Servicio doméstico y sus familiares.36
+    - Servicio doméstico y sus familiares.37
+    - Servicio doméstico y sus familiares.38
+    - Servicio doméstico y sus familiares.39
+    - Servicio doméstico y sus familiares.4
+    - Servicio doméstico y sus familiares.40
+    - Servicio doméstico y sus familiares.41
+    - Servicio doméstico y sus familiares.42
+    - Servicio doméstico y sus familiares.43
+    - Servicio doméstico y sus familiares.44
+    - Servicio doméstico y sus familiares.45
+    - Servicio doméstico y sus familiares.46
+    - Servicio doméstico y sus familiares.47
+    - Servicio doméstico y sus familiares.48
+    - Servicio doméstico y sus familiares.49
+    - Servicio doméstico y sus familiares.5
+    - Servicio doméstico y sus familiares.50
+    - Servicio doméstico y sus familiares.51
+    - Servicio doméstico y sus familiares.52
+    - Servicio doméstico y sus familiares.53
+    - Servicio doméstico y sus familiares.54
+    - Servicio doméstico y sus familiares.55
+    - Servicio doméstico y sus familiares.56
+    - Servicio doméstico y sus familiares.57
+    - Servicio doméstico y sus familiares.58
+    - Servicio doméstico y sus familiares.59
+    - Servicio doméstico y sus familiares.6
+    - Servicio doméstico y sus familiares.60
+    - Servicio doméstico y sus familiares.61
+    - Servicio doméstico y sus familiares.62
+    - Servicio doméstico y sus familiares.63
+    - Servicio doméstico y sus familiares.64
+    - Servicio doméstico y sus familiares.65
+    - Servicio doméstico y sus familiares.66
+    - Servicio doméstico y sus familiares.67
+    - Servicio doméstico y sus familiares.68
+    - Servicio doméstico y sus familiares.69
+    - Servicio doméstico y sus familiares.7
+    - Servicio doméstico y sus familiares.70
+    - Servicio doméstico y sus familiares.71
+    - Servicio doméstico y sus familiares.72
+    - Servicio doméstico y sus familiares.73
+    - Servicio doméstico y sus familiares.74
+    - Servicio doméstico y sus familiares.75
+    - Servicio doméstico y sus familiares.76
+    - Servicio doméstico y sus familiares.77
+    - Servicio doméstico y sus familiares.78
+    - Servicio doméstico y sus familiares.79
+    - Servicio doméstico y sus familiares.8
+    - Servicio doméstico y sus familiares.80
+    - Servicio doméstico y sus familiares.81
+    - Servicio doméstico y sus familiares.82
+    - Servicio doméstico y sus familiares.83
+    - Servicio doméstico y sus familiares.84
+    - Servicio doméstico y sus familiares.85
+    - Servicio doméstico y sus familiares.86
+    - Servicio doméstico y sus familiares.87
+    - Servicio doméstico y sus familiares.88
+    - Servicio doméstico y sus familiares.89
+    - Servicio doméstico y sus familiares.9
+    - Servicio doméstico y sus familiares.90
+    - Servicio doméstico y sus familiares.91
+    - Servicio doméstico y sus familiares.92
+    - Servicio doméstico y sus familiares.93
+    - Servicio doméstico y sus familiares.94
+    - Servicio doméstico y sus familiares.95
+    - Servicio doméstico y sus familiares.96
+    - Servicio doméstico y sus familiares.97
+    - Servicio doméstico y sus familiares.98
+    - Servicio doméstico y sus familiares.99
+    - Yerno / Nuera.0
+    - Yerno / Nuera.1
+    - Yerno / Nuera.10
+    - Yerno / Nuera.100
+    - Yerno / Nuera.101
+    - Yerno / Nuera.102
+    - Yerno / Nuera.103
+    - Yerno / Nuera.104
+    - Yerno / Nuera.105
+    - Yerno / Nuera.106
+    - Yerno / Nuera.107
+    - Yerno / Nuera.108
+    - Yerno / Nuera.109
+    - Yerno / Nuera.11
+    - Yerno / Nuera.110
+    - Yerno / Nuera.12
+    - Yerno / Nuera.13
+    - Yerno / Nuera.14
+    - Yerno / Nuera.15
+    - Yerno / Nuera.16
+    - Yerno / Nuera.17
+    - Yerno / Nuera.18
+    - Yerno / Nuera.19
+    - Yerno / Nuera.2
+    - Yerno / Nuera.20
+    - Yerno / Nuera.21
+    - Yerno / Nuera.22
+    - Yerno / Nuera.23
+    - Yerno / Nuera.24
+    - Yerno / Nuera.25
+    - Yerno / Nuera.26
+    - Yerno / Nuera.27
+    - Yerno / Nuera.28
+    - Yerno / Nuera.29
+    - Yerno / Nuera.3
+    - Yerno / Nuera.30
+    - Yerno / Nuera.31
+    - Yerno / Nuera.32
+    - Yerno / Nuera.33
+    - Yerno / Nuera.34
+    - Yerno / Nuera.35
+    - Yerno / Nuera.36
+    - Yerno / Nuera.37
+    - Yerno / Nuera.38
+    - Yerno / Nuera.39
+    - Yerno / Nuera.4
+    - Yerno / Nuera.40
+    - Yerno / Nuera.41
+    - Yerno / Nuera.42
+    - Yerno / Nuera.43
+    - Yerno / Nuera.44
+    - Yerno / Nuera.45
+    - Yerno / Nuera.46
+    - Yerno / Nuera.47
+    - Yerno / Nuera.48
+    - Yerno / Nuera.49
+    - Yerno / Nuera.5
+    - Yerno / Nuera.50
+    - Yerno / Nuera.51
+    - Yerno / Nuera.52
+    - Yerno / Nuera.53
+    - Yerno / Nuera.54
+    - Yerno / Nuera.55
+    - Yerno / Nuera.56
+    - Yerno / Nuera.57
+    - Yerno / Nuera.58
+    - Yerno / Nuera.59
+    - Yerno / Nuera.6
+    - Yerno / Nuera.60
+    - Yerno / Nuera.61
+    - Yerno / Nuera.62
+    - Yerno / Nuera.63
+    - Yerno / Nuera.64
+    - Yerno / Nuera.65
+    - Yerno / Nuera.66
+    - Yerno / Nuera.67
+    - Yerno / Nuera.68
+    - Yerno / Nuera.69
+    - Yerno / Nuera.7
+    - Yerno / Nuera.70
+    - Yerno / Nuera.71
+    - Yerno / Nuera.72
+    - Yerno / Nuera.73
+    - Yerno / Nuera.74
+    - Yerno / Nuera.75
+    - Yerno / Nuera.76
+    - Yerno / Nuera.77
+    - Yerno / Nuera.78
+    - Yerno / Nuera.79
+    - Yerno / Nuera.8
+    - Yerno / Nuera.80
+    - Yerno / Nuera.81
+    - Yerno / Nuera.82
+    - Yerno / Nuera.83
+    - Yerno / Nuera.84
+    - Yerno / Nuera.85
+    - Yerno / Nuera.86
+    - Yerno / Nuera.87
+    - Yerno / Nuera.88
+    - Yerno / Nuera.89
+    - Yerno / Nuera.9
+    - Yerno / Nuera.90
+    - Yerno / Nuera.91
+    - Yerno / Nuera.92
+    - Yerno / Nuera.93
+    - Yerno / Nuera.94
+    - Yerno / Nuera.95
+    - Yerno / Nuera.96
+    - Yerno / Nuera.97
+    - Yerno / Nuera.98
+    - Yerno / Nuera.99
+
+Tabla parentesco_jefe_cross_sexo, columnas:
+    - Cónyuge o pareja.Mujer
+    - Cónyuge o pareja.Varón
+    - Hijo(a) / Hijastro(a).Mujer
+    - Hijo(a) / Hijastro(a).Varón
+    - Jefe(a).Mujer
+    - Jefe(a).Varón
+    - Nieto(a).Mujer
+    - Nieto(a).Varón
+    - Otros familiares.Mujer
+    - Otros familiares.Varón
+    - Otros no familiares.Mujer
+    - Otros no familiares.Varón
+    - Padre / Madre / Suegro(a).Mujer
+    - Padre / Madre / Suegro(a).Varón
+    - Servicio doméstico y sus familiares.Mujer
+    - Servicio doméstico y sus familiares.Varón
+    - Yerno / Nuera.Mujer
+    - Yerno / Nuera.Varón
+
+Tabla parentesco_jefe_cross_tamanio_familia, columnas:
+    - 1.Cónyuge o pareja
+    - 1.Hijo(a) / Hijastro(a)
+    - 1.Jefe(a)
+    - 1.Nieto(a)
+    - 1.Otros familiares
+    - 1.Otros no familiares
+    - 1.Padre / Madre / Suegro(a)
+    - 1.Servicio doméstico y sus familiares
+    - 1.Yerno / Nuera
+    - 2.Cónyuge o pareja
+    - 2.Hijo(a) / Hijastro(a)
+    - 2.Jefe(a)
+    - 2.Nieto(a)
+    - 2.Otros familiares
+    - 2.Otros no familiares
+    - 2.Padre / Madre / Suegro(a)
+    - 2.Servicio doméstico y sus familiares
+    - 2.Yerno / Nuera
+    - 3.Cónyuge o pareja
+    - 3.Hijo(a) / Hijastro(a)
+    - 3.Jefe(a)
+    - 3.Nieto(a)
+    - 3.Otros familiares
+    - 3.Otros no familiares
+    - 3.Padre / Madre / Suegro(a)
+    - 3.Servicio doméstico y sus familiares
+    - 3.Yerno / Nuera
+    - 4.Cónyuge o pareja
+    - 4.Hijo(a) / Hijastro(a)
+    - 4.Jefe(a)
+    - 4.Nieto(a)
+    - 4.Otros familiares
+    - 4.Otros no familiares
+    - 4.Padre / Madre / Suegro(a)
+    - 4.Servicio doméstico y sus familiares
+    - 4.Yerno / Nuera
+    - 5.Cónyuge o pareja
+    - 5.Hijo(a) / Hijastro(a)
+    - 5.Jefe(a)
+    - 5.Nieto(a)
+    - 5.Otros familiares
+    - 5.Otros no familiares
+    - 5.Padre / Madre / Suegro(a)
+    - 5.Servicio doméstico y sus familiares
+    - 5.Yerno / Nuera
+    - 6.Cónyuge o pareja
+    - 6.Hijo(a) / Hijastro(a)
+    - 6.Jefe(a)
+    - 6.Nieto(a)
+    - 6.Otros familiares
+    - 6.Otros no familiares
+    - 6.Padre / Madre / Suegro(a)
+    - 6.Servicio doméstico y sus familiares
+    - 6.Yerno / Nuera
+    - 7.Cónyuge o pareja
+    - 7.Hijo(a) / Hijastro(a)
+    - 7.Jefe(a)
+    - 7.Nieto(a)
+    - 7.Otros familiares
+    - 7.Otros no familiares
+    - 7.Padre / Madre / Suegro(a)
+    - 7.Servicio doméstico y sus familiares
+    - 7.Yerno / Nuera
+    - 8 y más.Cónyuge o pareja
+    - 8 y más.Hijo(a) / Hijastro(a)
+    - 8 y más.Jefe(a)
+    - 8 y más.Nieto(a)
+    - 8 y más.Otros familiares
+    - 8 y más.Otros no familiares
+    - 8 y más.Padre / Madre / Suegro(a)
+    - 8 y más.Servicio doméstico y sus familiares
+    - 8 y más.Yerno / Nuera
+
+Tabla personas_por_hogar, columnas:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8 y más
