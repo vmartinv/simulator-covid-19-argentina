@@ -2,7 +2,6 @@
 import requests
 import os
 import zipfile
-from simpledbf import Dbf5
 
 DATA_DIR = os.path.join('data', 'argentina')
 INDEC_DIR = os.path.join(DATA_DIR, 'indec')
@@ -20,21 +19,20 @@ def download_url(url, save_path, chunk_size=128):
             for chunk in r.iter_content(chunk_size=chunk_size):
                 fd.write(chunk)
 
+def download_and_extract(url, save_zip, save_file, path):
+    if not os.path.exists(save_file):
+        download_url(url, save_zip)
+        with zipfile.ZipFile(save_zip, 'r') as zip_ref:
+            zip_ref.extract(save_file, path)
+
 def get_indec():
-    ZIP_SOURCE = 'https://sitioanterior.indec.gob.ar/ftp/cuadros/territorio/codgeo/Codgeo_Pais_x_dpto_con_datos.zip'
-    ZIP_FILE = 'pxdptodatosok.zip'
-    DBF_FILE = 'pxdptodatosok.dbf'
-    OUTPUT_FILE = 'pxdptodatosok.hdf5'
     ensure_dir_exists(INDEC_DIR)
-    if not os.path.exists(os.path.join(INDEC_DIR, OUTPUT_FILE)):
-        # get dbf file
-        if not os.path.exists(os.path.join(INDEC_DIR, DBF_FILE)):
-            download_url(ZIP_SOURCE, os.path.join(INDEC_DIR, ZIP_FILE))
-            with zipfile.ZipFile(ZIP_FILE, 'r') as zip_ref:
-                zip_ref.extract(DBF_FILE, INDEC_DIR)
-        
-        dbf = Dbf5(os.path.join(INDEC_DIR, DBF_FILE), codec='utf8')
-        dbf.to_pandashdf(os.path.join(INDEC_DIR, OUTPUT_FILE))
+    ZIP_SOURCE = 'https://sitioanterior.indec.gob.ar/ftp/cuadros/territorio/codgeo/Codgeo_Pais_x_dpto_con_datos.zip'
+    ZIP_FILE = os.path.join(INDEC_DIR, 'pxdptodatosok.zip')
+
+    SHP_FILE = 'pxdptodatosok.shp'
+    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE, INDEC_DIR)
+    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.shx'), INDEC_DIR)
 
 def get_all():
     ensure_dir_exists(DATA_DIR)
