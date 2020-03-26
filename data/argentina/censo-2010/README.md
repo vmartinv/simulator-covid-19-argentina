@@ -138,8 +138,24 @@ Tabla parentesco_con_jefe, columnas:
     - Yerno / Nuera
 
 Tabla parentesco_cross_tamanio_familia, columnas:
+    - 1.0
+    - 2.0
+    - 3.0
+    - 4.0
+    - 5.0
+    - 6.0
+    - 7.0
+    - 8  y más
 
 Tabla personas_por_hogar, columnas:
+    - 1.0
+    - 2.0
+    - 3.0
+    - 4.0
+    - 5.0
+    - 6.0
+    - 7.0
+    - 8  y más
 
 Tabla sexo, columnas:
     - Mujer

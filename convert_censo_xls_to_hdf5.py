@@ -5,31 +5,11 @@ import os
 import glob
 import pandas as pd
 import errno
-
+import re
+from utils.utils import fix_encoding, normalize_dpto_name
 DATA_DIR = os.path.join('data', 'argentina', 'censo-2010')
 README_FILE = os.path.join(DATA_DIR, 'README.md')
 DEBUG = False
-
-def fix_encoding(text):
-    fixes = [
-        ('·', 'á'),
-        ('È', 'é'),
-        ('Ì', 'í'),
-        ('Û', 'ó'),
-        ('˙', 'ú'),
-        ('Ò', 'ñ'),
-        ('¸', 'ü'),
-        ('∞', 'ro'),
-        ('—', 'Ñ'),
-    ]
-    fixed = text
-    for orig, repl in fixes:
-        fixed = fixed.replace(orig, repl)
-    for c in list(fixed):
-        if c not in [r for o,r in fixes]+list(" .'-()/") and not c.isalnum():
-            print(f"Unrecognized character: {c} in {fixed}")
-            exit(1)
-    return fixed
 
 INDEX = 'area'
 
@@ -43,14 +23,16 @@ def parse_xls(xls):
         INDEX: []
     }
     for row in range(worksheet.nrows):
-        first_col = str(worksheet.cell(row, 0).value)
+        first_col = str(worksheet.cell(row, 0).value).strip()
         if area_row is None:
             if first_col.startswith(SUBTABLE_START):
+                number = int(re.match(fr"{SUBTABLE_START}\s*#\s*(\d+)\s*", first_col).group(1))
+                dataset[INDEX].append(number)
                 name = worksheet.cell(row, 1).value
-                dataset[INDEX].append(name)
+                # dataset['departamen'].append(name)
                 area_row = row
         else:
-            if first_col.startswith(SUBTABLE_END):
+            if first_col == SUBTABLE_END:
                 for k in dataset:
                     if len(dataset[k])<len(dataset[INDEX]):
                         dataset[k].append('0')
@@ -60,7 +42,7 @@ def parse_xls(xls):
                     if len(dataset[k])<len(dataset[INDEX]):
                         dataset[k].append('0')
                 area_row = None
-            elif row > area_row + 2: # actual rows
+            elif row > area_row + 2 and first_col: # actual rows
                 if first_col not in dataset:
                     dataset[first_col] = []
                 value = worksheet.cell(row, 1).value
@@ -75,10 +57,10 @@ def parse_xls(xls):
         if k != INDEX:
             dataset_fixed[fix_encoding(k)] = [int(v) for v in dataset[k]]
         else:
-            dataset_fixed[k] = [fix_encoding(v) for v in dataset[k]]
+            dataset_fixed[k] = [v for v in dataset[k]]
     dataset = dataset_fixed
-
     return dataset
+
 
 def convert_all():
     combined_dataset = None
