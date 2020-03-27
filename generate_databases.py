@@ -2,6 +2,7 @@
 import requests
 import os
 import zipfile
+import fake_population_generator
 
 DATA_DIR = os.path.join('data', 'argentina')
 INDEC_DIR = os.path.join(DATA_DIR, 'indec')
@@ -25,7 +26,7 @@ def download_and_extract(url, save_zip, save_file, path):
         with zipfile.ZipFile(save_zip, 'r') as zip_ref:
             zip_ref.extract(save_file, path)
 
-def get_indec():
+def store_indec():
     ensure_dir_exists(INDEC_DIR)
     ZIP_SOURCE = 'https://sitioanterior.indec.gob.ar/ftp/cuadros/territorio/codgeo/Codgeo_Pais_x_dpto_con_datos.zip'
     ZIP_FILE = os.path.join(INDEC_DIR, 'pxdptodatosok.zip')
@@ -33,10 +34,18 @@ def get_indec():
     SHP_FILE = 'pxdptodatosok.shp'
     download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE, INDEC_DIR)
     download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.shx'), INDEC_DIR)
+    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.dbf'), INDEC_DIR)
 
-def get_all():
+def store_fake_population():
+    POP_FILE = os.path.join(DATA_DIR, 'fake_population2.hdf')
+    if not os.path.exists(POP_FILE):
+        print(f"Generating fake population to {POP_FILE}...")
+        fake_population_generator.generate().to_hdf(hdf_file = POP_FILE)
+
+def store_all():
     ensure_dir_exists(DATA_DIR)
-    get_indec()
+    store_indec()
+    store_fake_population()
 
 if __name__ == "__main__":
-    get_all()
+    store_all()
