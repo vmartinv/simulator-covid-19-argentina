@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import pandas as pd
 
@@ -64,5 +65,3 @@ def validate_dpto_indexes(col1, col2):
             diff_table['en_col2'].append(d in col2)
         print(pd.DataFrame(data=diff_table))
         exit(1)
-    else:
-        print("ok!")
