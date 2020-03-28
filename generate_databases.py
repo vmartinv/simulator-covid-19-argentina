@@ -3,6 +3,8 @@ import requests
 import os
 import zipfile
 import fake_population_generator
+import glob
+import shutil
 
 DATA_DIR = os.path.join('data', 'argentina')
 INDEC_DIR = os.path.join(DATA_DIR, 'indec')
@@ -20,11 +22,14 @@ def download_url(url, save_path, chunk_size=128):
             for chunk in r.iter_content(chunk_size=chunk_size):
                 fd.write(chunk)
 
-def download_and_extract(url, save_zip, save_file, path):
-    if not os.path.exists(save_file):
+def download_and_extract(url, save_zip, save_file=None, path=None):
+    if  (save_file is None or not os.path.exists(os.path.join(path or '', save_file))):
         download_url(url, save_zip)
         with zipfile.ZipFile(save_zip, 'r') as zip_ref:
-            zip_ref.extract(save_file, path)
+            if save_file is not None:
+                zip_ref.extract(save_file, path)
+            else:
+                zip_ref.extractall(path)
 
 def store_indec():
     ensure_dir_exists(INDEC_DIR)
@@ -36,8 +41,19 @@ def store_indec():
     download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.shx'), INDEC_DIR)
     download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.dbf'), INDEC_DIR)
 
+def store_densidad():
+    ZIP_SOURCE = "https://github.com/datosgobar/densidad-poblacion/archive/master.zip"
+    ZIP_FILE = os.path.join(DATA_DIR, 'datosgobar-densidad-poblacion.zip')
+    DEST_DIR = os.path.join(DATA_DIR, 'datosgobar-densidad-poblacion')
+    ensure_dir_exists(DEST_DIR)
+    if len(glob.glob(os.path.join(DEST_DIR, '*'))) != 10:
+        download_and_extract(ZIP_SOURCE, ZIP_FILE, None, DEST_DIR)
+        for file in glob.glob(os.path.join(DEST_DIR, 'densidad-poblacion-master', 'dataset', '*')):
+            shutil.copy(file, DEST_DIR)
+        shutil.rmtree(os.path.join(DEST_DIR, 'densidad-poblacion-master'))
+
 def store_fake_population():
-    POP_FILE = os.path.join(DATA_DIR, 'fake_population2.hdf')
+    POP_FILE = os.path.join(DATA_DIR, 'fake_population.hdf')
     if not os.path.exists(POP_FILE):
         print(f"Generating fake population to {POP_FILE}...")
         fake_population_generator.generate().to_hdf(hdf_file = POP_FILE)
@@ -45,6 +61,7 @@ def store_fake_population():
 def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
+    store_densidad()
     store_fake_population()
 
 if __name__ == "__main__":
