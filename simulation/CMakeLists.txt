@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.14)
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+add_definitions(-DBOOST_LOG_DYN_LINK)
+find_package(Boost 1.67.0 COMPONENTS log_setup log date_time system thread regex chrono filesystem) 
+
+include_directories(${Boost_INCLUDE_DIRS}) 
+add_executable(simulation simulation.cpp endian.hpp progress_bar.hpp)
+target_compile_features(simulation PRIVATE cxx_std_17) 
+target_link_libraries(simulation ${Boost_LIBRARIES})

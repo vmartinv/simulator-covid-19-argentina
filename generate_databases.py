@@ -53,10 +53,14 @@ def store_densidad():
         shutil.rmtree(os.path.join(DEST_DIR, 'densidad-poblacion-master'))
 
 def store_fake_population():
-    POP_FILE = os.path.join(DATA_DIR, 'fake_population.hdf')
+    POP_SMALL_FILE = os.path.join(DATA_DIR, 'fake_population_small.dat')
+    if not os.path.exists(POP_SMALL_FILE):
+        print(f"Generating small fake population to {POP_SMALL_FILE}...")
+        fake_population_generator.generate(frac=0.01).to_dat(POP_SMALL_FILE)
+    POP_FILE = os.path.join(DATA_DIR, 'fake_population.dat')
     if not os.path.exists(POP_FILE):
         print(f"Generating fake population to {POP_FILE}...")
-        fake_population_generator.generate().to_hdf(hdf_file = POP_FILE)
+        fake_population_generator.generate().to_dat(POP_FILE)
 
 def store_all():
     ensure_dir_exists(DATA_DIR)

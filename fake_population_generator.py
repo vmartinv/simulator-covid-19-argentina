@@ -9,6 +9,7 @@ from utils.utils import normalize_dpto_name, validate_dpto_indexes
 import os
 import re
 from collections import defaultdict
+import struct
 
 DATA_DIR = os.path.join('data', 'argentina')
 CENSO_HDF = os.path.join(DATA_DIR, 'censo-2010', 'censo.hdf5')
@@ -23,24 +24,34 @@ class Person:
         self.sexo = sexo
         self.estudia = estudia
         self.trabaja = trabaja
+    
+    def pack(self):
+        struct_format = '>IIHB???'
+        return struct.pack(struct_format, self.id, self.family, self.zone, int(self.edad), self.sexo == 'Mujer', self.estudia, self.trabaja)
 
 class Population:
     def __init__(self):
         self.people = []
         self.families = []
         self.zones = []
-    def to_hdf(self, hdf_file = os.path.join(DATA_DIR, 'fake_population.hdf')):
+    
+    def to_dat(self, dat_file):
+        with open(dat_file, mode='wb') as fout:
+            for p in tqdm(self.people):
+                fout.write(p.pack())
+
+    def to_hdf(self, hdf_file):
         data = {
-            'id': [p.id for p in self.people],
-            'family': [p.family for p in self.people],
-            'zone': [p.zone for p in self.people],
-            'edad': [p.edad for p in self.people],
-            'sexo': [p.sexo for p in self.people],
+            'id': pd.Series([int(p.id) for p in self.people], dtype='int32'),
+            'family': pd.Series([int(p.family) for p in self.people], dtype='int32'),
+            'zone': pd.Series([int(p.zone) for p in self.people], dtype='int32'),
+            'edad': pd.Series([int(p.edad) for p in self.people], dtype='int8'),
+            'sexo': [p.sexo == 'Mujer' for p in self.people],
             'estudia': [p.estudia for p in self.people],
             'trabaja': [p.trabaja for p in self.people],
         }
         df = pd.DataFrame(data, columns=data.keys())
-        df.to_hdf(hdf_file, 'population', mode='a')
+        df.to_hdf(hdf_file, 'population', mode='w')
 
 
 class GenWithDistribution:
@@ -53,7 +64,7 @@ class GenWithDistribution:
         return col[col.find('.')+1:]
     def get(self, k=1):
         if self.cur_index+k > len(self.precalc):
-            next_size = max(100, 2*len(self.precalc))
+            next_size = max(2*k, max(100, 2*len(self.precalc)))
             self.precalc = list(map(GenWithDistribution._remove_first_point,
                    random.choices(self.cols, cum_weights = self.cum_weights, k = next_size)))
             self.cur_index = 0
@@ -86,7 +97,7 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF):
             tables.append(table)
     return geodata, functools.reduce(lambda a,b: pd.merge(a, b, how='inner', on='area'), tables)
 
-def generate(genpop_dataset = load_population_census()):
+def generate(genpop_dataset = load_population_census(), frac=1.):
     geodata, census = genpop_dataset
     population = Population()
     tamanios_familia = ['1', '2', '3', '4', '5', '6', '7', '8 y más']
@@ -116,9 +127,8 @@ def generate(genpop_dataset = load_population_census()):
         trabajos[row['area']] = {k: GenWithDistribution(v, row) for k, v in edad_cross_trabaja.items()}
 
     print("Generating population...")
-    FRAC = 1.
-    with tqdm(total=40e6*FRAC, unit="people") as progress:
-        for index, row in geodata.sample(frac=FRAC).iterrows():
+    with tqdm(total=40e6*frac, unit="people") as progress:
+        for index, row in geodata.sample(frac=frac).iterrows():
             zone_id = len(population.zones)
             population.zones.append(row['geometry'])
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
@@ -129,7 +139,7 @@ def generate(genpop_dataset = load_population_census()):
             trabajos_d = trabajos[row['dpto_id']]
             by_parentesco = defaultdict(list)
             for tam_flia in tamanios_flias:
-                tam_flia_num = int(tam_flia.replace('8 y más', '8'))
+                tam_flia_num = int(tam_flia.replace('8 y más', str(random.choices(range(8, 16))[0])))
                 parentescos_flia = parentescos_d[tam_flia].get(k=tam_flia_num)
                 family_id = len(population.families)
                 population.families.append([])
@@ -143,24 +153,24 @@ def generate(genpop_dataset = load_population_census()):
             for parentesco, people in by_parentesco.items():
                 edades_par = edades_d[parentesco].get(len(people))
                 sexo_par = sexos_d[parentesco].get(len(people))
-                for p,edad,sexo in zip(people, edades_par, sexo_par):
-                    population.people[p].edad = edad
-                    population.people[p].sexo = sexo
-                    by_edad[edad].append(p)
-            for edad, people in by_edad.items():
-                if int(edad)>=3:
-                    estudian = escuelas_d[edad].get(len(people))
-                    for p,estudia in zip(people, estudian):
-                        population.people[p].estudia = estudia == 'Asiste'
-                if int(edad)>=14:
-                    trabajan = trabajos_d[edad].get(len(people))
-                    for p,trabajan in zip(people, trabajan):
-                        population.people[p].trabajan = trabajan == 'Ocupado'
+                for p,edadv,sexov in zip(people, edades_par, sexo_par):
+                    population.people[p].edad = edadv
+                    population.people[p].sexo = sexov
+                    by_edad[edadv].append(p)
+            for edadv, people in by_edad.items():
+                if int(edadv)>=3:
+                    estudian = escuelas_d[edadv].get(len(people))
+                    for p,estudiav in zip(people, estudian):
+                        population.people[p].estudia = estudiav == 'Asiste'
+                if int(edadv)>=14:
+                    trabajan = trabajos_d[edadv].get(len(people))
+                    for p,trabajav in zip(people, trabajan):
+                        population.people[p].trabaja = trabajav == 'Ocupado'
         return population
 
 
 def main():
-    generate().to_hdf()
+    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'))
 
 if __name__ == "__main__":
     main()
