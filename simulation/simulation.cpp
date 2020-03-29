@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <algorithm>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -7,6 +8,7 @@
 #include <boost/log/trivial.hpp>
 #include "endian.hpp"
 #include "progress_bar.hpp"
+#include "population.hpp"
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -20,115 +22,177 @@ const fs::path FAKE_DB_FILE = fs::path(DATA_DIR) / fs::path("fake_population_sma
 const fs::path FAKE_DB_FILE = fs::path(DATA_DIR) / fs::path("fake_population.dat");
 #endif
 
-struct Person{
-    unsigned int id, family;
-    unsigned short zone;
-    unsigned char edad;
-    bool sexo;
-    bool estudia;
-    bool trabaja;
+auto uniform = mt19937{random_device{}()};
+
+enum PersonState{
+    SUSCEPTIBLE = 0,
+    EXPOSED,
+    INFECTED_1,
+    INFECTED_2,
+    INFECTED_3,
+    DEAD,
+    RECOVERED,
+    PERSON_STATE_COUNT
+};
+const int INFECTED_STATES_COUNT = 3;
+const int MAX_AGE = 110;
+static bool is_infected(const PersonState& s){
+    return s == INFECTED_1 || s == INFECTED_2 || s == INFECTED_3;
+}
+enum Environments{
+    HOME = 0,
+    SCHOOL,
+    WORK,
+    NEIGHBOURHOOD,
+    ENVIRONMENT_COUNT
 };
 
-ostream& operator<< (ostream& os, Person& p)
-{
-    os << p.id << ' ';
-    os << p.family << ' ';
-    os << p.zone << ' ';
-    os << int(p.edad) << ' ';
-    os << p.sexo << ' ';
-    os << p.estudia << ' ';
-    os << p.trabaja;
-    return os;
-}
 
-istream& operator>> (istream& is, Person& p)
-{
-    static const size_t struct_size = 14;
-    unsigned char buffer[struct_size];
-    is.read(reinterpret_cast<char*>(buffer), struct_size);
-    unsigned char *write_ptr=buffer;
-    p.id = from_big_endian<uint32_t>(write_ptr);
-    write_ptr+=4;
-    p.family = from_big_endian<uint32_t>(write_ptr);
-    write_ptr+=4;
-    p.zone = from_big_endian<uint16_t>(write_ptr);
-    write_ptr+=2;
-    p.edad = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
-    p.sexo = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
-    p.estudia = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
-    p.trabaja = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
-    return is;
-}
 
-struct Population{
-    vector<Person> people;
-    int num_families = 0;
-    int num_zones = 0;
-    vector<unordered_set<int>> by_zones;
-    Population() {}
-    Population(const string &pop_filename){
-        LOG(info) << "Loading database " << pop_filename << "...";    
-        ifstream file(pop_filename, ios::binary);
-        std::copy(std::istream_iterator<Person>(file),
-            std::istream_iterator<Person>(),
-            std::back_inserter(people));
-        assert(people.size() > 0);
-        num_families = people.back().family+1;
-        num_zones = people.back().zone+1;
-        by_zones.resize(num_zones);
-        validate();
-    }
 
-    void validate(){
-        LOG(info) << "Validating database...";
-        ProgressBar progressBar(people.size(), 70);
-        int last_id = -1;
-        for(const auto &p : people){
-            by_zones[p.zone].insert(p.id);
-            assert(0 <= p.id && p.id < people.size());
-            assert(0 <= p.family && p.family < num_families);
-            ++progressBar;
-            progressBar.display();
-        }
-        progressBar.done();
-    }
+typedef int PersonId;
+typedef int EnvironmentId;
 
-    void report(){
-        LOG(info) << "Number of people: " << people.size();
-        LOG(info) << "Random person: " << people[rand() % people.size()];
-    }
+struct PersonSeirState{
+    PersonState state;
+    int index_on_general;
+    EnvironmentId environment_id[ENVIRONMENT_COUNT];
+    int index_on_environment[ENVIRONMENT_COUNT];
+};
+struct EnvironmentState{
+    int num_inf[INFECTED_STATES_COUNT];
+    vector<PersonId> susceptibles;
 };
 
 
 struct SeirState{
     Population population;
-    set<int> susceptible;
-    set<int> exposed;
-    set<int> infected_1;
-    set<int> infected_2;
-    set<int> dead;
-    set<int> recovered;
+    vector<PersonId> general[PERSON_STATE_COUNT][MAX_AGE+1];
+    vector<EnvironmentState> environments[ENVIRONMENT_COUNT];
+    vector<PersonSeirState> estado_persona;
+
     SeirState(Population population): population(population) {
     }
+
     void reset(){
         LOG(info) << "Reseting state...";
-        susceptible.clear();
-        exposed.clear();
-        infected_1.clear();
-        infected_2.clear();
-        dead.clear();
-        recovered.clear();
+        ProgressBar progressBar(population.people.size(), 70);
+        for(int i=0; i<PERSON_STATE_COUNT; i++){
+            for(int j=0; j<=MAX_AGE; j++){
+                general[i][j].clear();
+            }
+        }
+        estado_persona.resize(population.people.size());
+        for(const auto& p: population.people){
+            memset(&estado_persona[p.id], -1, sizeof(PersonSeirState));
+            estado_persona[p.id].state = SUSCEPTIBLE;
+            estado_persona[p.id].index_on_general = general[SUSCEPTIBLE][p.edad].size();
+            general[SUSCEPTIBLE][p.edad].push_back(p.id);
+            ++progressBar;
+        }
+        progressBar.done();
+        generate_environments();
+    }
+    void generate_environments(){
+        LOG(info) << "Generating environments...";
+        ProgressBar progressBar(population.people.size(), 70);
+        for(int i=0; i<ENVIRONMENT_COUNT; i++){
+            environments[i].clear();
+        }
+        environments[HOME].resize(population.num_families);
+        environments[NEIGHBOURHOOD].resize(population.num_zones);
+        for(const auto& p: population.people){
+            estado_persona[p.id].environment_id[HOME] = p.family;
+            estado_persona[p.id].index_on_environment[HOME] = environments[HOME][p.family].susceptibles.size();
+            environments[HOME][p.family].susceptibles.push_back(p.id);
+
+            estado_persona[p.id].environment_id[NEIGHBOURHOOD] = p.zone;
+            estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][p.zone].susceptibles.size();
+            environments[NEIGHBOURHOOD][p.zone].susceptibles.push_back(p.id);
+            
+            ++progressBar;
+        }
+        progressBar.done();
+    }
+
+    void remove_from_general_list(const PersonId id){
+        auto edad = population.get(id).edad;
+        auto st = estado_persona[id].state;
+        vector<PersonId>& vec = general[st][edad];
+        int pos = estado_persona[id].index_on_general;
+        if(pos != vec.size()-1){
+            vec[pos] = vec.back();
+            estado_persona[vec[pos]].index_on_general = pos;
+        }
+        vec.pop_back();
+    }
+
+    void add_to_general_list(const PersonId id){
+        auto edad = population.get(id).edad;
+        auto st = estado_persona[id].state;
+        estado_persona[id].index_on_general = general[st][edad].size();
+        general[st][edad].push_back(id);
+    }
+
+    void remove_from_susceptible_envs_lists(const PersonId id){
+        for(int env=0; env<ENVIRONMENT_COUNT; env++){
+            PersonSeirState& est_p = estado_persona[id];
+            if(est_p.environment_id[env]!=-1){
+                vector<PersonId>& vec = environments[env][est_p.environment_id[env]].susceptibles;
+                int pos = est_p.index_on_environment[env];
+                assert(pos!=-1);
+                if(pos != vec.size()-1){
+                    vec[pos] = vec.back();
+                    estado_persona[vec[pos]].index_on_environment[env] = pos;
+                }
+                vec.pop_back();
+            }
+        }
+    }
+
+    void delta_infected_envs_count(const PersonId id, const int delta){
+        for(int env=0; env<ENVIRONMENT_COUNT; env++){
+            PersonSeirState& est_p = estado_persona[id];
+            if(est_p.environment_id[env]!=-1){
+                EnvironmentState &env_st = environments[env][estado_persona[id].environment_id[env]];
+                env_st.num_inf[est_p.state]+= delta;
+            }
+        }
+    }
+    
+    void change_state(const PersonId &id, const PersonState &nw){
+        const PersonState old = estado_persona[id].state;
+        if(old==nw){
+            return;
+        }
+        remove_from_general_list(id);
+        if(old==SUSCEPTIBLE){
+            remove_from_susceptible_envs_lists(id);
+        }
+        if(is_infected(old)){
+            delta_infected_envs_count(id, -1);
+        }
+        estado_persona[id].state = nw;
+        if(is_infected(nw)){
+            delta_infected_envs_count(id, 1);
+        }
+        add_to_general_list(id);
     }
 };
 
-void do_simulation(SeirState &state, int days=312){
+void do_simulation(SeirState &state, int days=256){
     state.reset();
+    LOG(info) << "Starting simulation...";
     for(int day = 1; day<=days; day++){
-
+        for(int age=0; age<=MAX_AGE; age++){
+            vector<PersonId> &i3 = state.general[INFECTED_3][age];
+            vector<PersonId> deaths;
+            int expected_deaths = round(i3.size()*0.01);
+            sample(begin(i3), end(i3), back_inserter(deaths), expected_deaths, uniform);
+            for(const PersonId id: deaths){
+                state.change_state(id, DEAD);
+            }
+        }
     }
 }
 

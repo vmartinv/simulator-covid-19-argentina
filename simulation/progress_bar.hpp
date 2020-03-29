@@ -8,29 +8,16 @@ class ProgressBar {
 private:
     unsigned int ticks = 0;
 
-    unsigned int last_pos = -1;
     const unsigned int total_ticks;
     const unsigned int bar_width;
     const char complete_char = '=';
     const char incomplete_char = ' ';
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
+    const unsigned int step;
 
-public:
-    ProgressBar(unsigned int total, unsigned int width, char complete, char incomplete) :
-            total_ticks {total}, bar_width {width}, complete_char {complete}, incomplete_char {incomplete} {}
-
-    ProgressBar(unsigned int total, unsigned int width) : total_ticks {total}, bar_width {width} {}
-
-    unsigned int operator++() { return ++ticks; }
-
-    void display()
-    {
+    inline void display() {
         float progress = (float) ticks / total_ticks;
         int pos = (int) (bar_width * progress);
-        if(pos==last_pos){
-            return;
-        }
-
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
         auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now-start_time).count();
 
@@ -42,13 +29,25 @@ public:
             else std::cout << incomplete_char;
         }
         std::cout << "] " << int(progress * 100.0) << "% "
-                  << float(time_elapsed) / 1000.0 << "s\r";
+                << float(time_elapsed) / 1000.0 << "s\r";
         std::cout.flush();
-        last_pos = pos;
+    }
+public:
+    ProgressBar(unsigned int total, unsigned int width, char complete, char incomplete) :
+            total_ticks {total}, bar_width {width}, complete_char {complete}, incomplete_char {incomplete}, step {total/width} {}
+
+    ProgressBar(unsigned int total, unsigned int width) : total_ticks {total}, bar_width {width}, step {total/width}  {}
+
+
+    inline void operator++() {
+        if(++ticks%step==0){
+            display();
+        }
     }
 
-    void done()
+    inline void done()
     {
+        ticks = total_ticks;
         display();
         std::cout << std::endl;
     }
