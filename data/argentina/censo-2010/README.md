@@ -1,4 +1,4 @@
-Generado a partir del censo 2010 utilizando https://redatam.indec.gob.ar/argbin/RpWebEngine.exe/PortalAction?&MODE=MAIN&BASE=CPV2010A&MAIN=WebServerMain.inl
+Generado a partir del censo 2010 utilizando https://redatam.indec.gob.ar/
 Fuente: elaboración propia en base a datos del INDEC. Censo Nacional de Población, Hogares y Viviendas 2010, procesado con Redatam+SP
 
 # Descripcion de {hdf_file}

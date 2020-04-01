@@ -143,3 +143,4 @@ media
 static
 .DS_Store
 data/argentina/fake_population.hdf
+.vscode

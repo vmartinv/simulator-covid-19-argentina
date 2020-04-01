@@ -97,7 +97,9 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF):
             tables.append(table)
     return geodata, functools.reduce(lambda a,b: pd.merge(a, b, how='inner', on='area'), tables)
 
-def generate(genpop_dataset = load_population_census(), frac=1.):
+def generate(genpop_dataset = None, frac=1.):
+    if genpop_dataset is None:
+        genpop_dataset = load_population_census()
     geodata, census = genpop_dataset
     population = Population()
     tamanios_familia = ['1', '2', '3', '4', '5', '6', '7', '8 y más']
@@ -105,6 +107,7 @@ def generate(genpop_dataset = load_population_census(), frac=1.):
     edad = list(map(str, range(111)))
     sexo = ['Mujer', 'Varón']
     escuela = ['Asiste', 'Asistió', 'Nunca asistió']
+    nivel_educactivo = ['Asiste', 'Asistió', 'Nunca asistió']
     trabaja = ['Desocupado', 'Inactivo', 'Ocupado']
     tamanio_cross_parentescos = cross_cols(tamanios_familia, parentescos)
     parentescos_cross_edad = cross_cols(parentescos, edad)

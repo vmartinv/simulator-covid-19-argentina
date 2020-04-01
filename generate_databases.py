@@ -5,6 +5,7 @@ import zipfile
 import fake_population_generator
 import glob
 import shutil
+import convert_school_db
 
 DATA_DIR = os.path.join('data', 'argentina')
 INDEC_DIR = os.path.join(DATA_DIR, 'indec')
@@ -62,11 +63,35 @@ def store_fake_population():
         print(f"Generating fake population to {POP_FILE}...")
         fake_population_generator.generate().to_dat(POP_FILE)
 
+def store_schools():
+    EDUCACION_DIR = os.path.join(DATA_DIR, "ministerio-educacion")
+    ensure_dir_exists(EDUCACION_DIR)
+    # Taken from https://www.argentina.gob.ar/educacion/planeamiento/info-estadistica/bdd
+    DBS = [
+        ("https://www.argentina.gob.ar/sites/default/files/2018_base_usuaria_7-_matricula_por_edad.xlsx",
+        "2018_base_usuaria_7-_matricula_por_edad.xlsx",
+        "matricula_por_edad.hdf"
+        ),
+        ("https://www.argentina.gob.ar/sites/default/files/2018_base_usuaria_2-_matricula_y_secciones_0.xlsx",
+        "2018_base_usuaria_2-_matricula_y_secciones_0.xlsx",
+        "matricula_y_secciones.hdf"
+        ),
+    ]
+    for url, xls, hdf in DBS:
+        hdf = os.path.join(EDUCACION_DIR, hdf)
+        if not os.path.exists(hdf):
+            xls = os.path.join(EDUCACION_DIR, xls)
+            download_url(url, xls)
+            print(f'Generating {hdf}...')
+            convert_school_db.convert_xlsx_to_hdf(xls, hdf)
+
+
 def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
     store_densidad()
     store_fake_population()
+    store_schools()
 
 if __name__ == "__main__":
     store_all()

@@ -100,7 +100,7 @@ def convert_all():
         else:
             print(f"Warning: not parsing file {xls}")
     with open(README_FILE, 'w') as f:
-        f.write('Generado a partir del censo 2010 utilizando https://redatam.indec.gob.ar/argbin/RpWebEngine.exe/PortalAction?&MODE=MAIN&BASE=CPV2010A&MAIN=WebServerMain.inl\n')
+        f.write('Generado a partir del censo 2010 utilizando https://redatam.indec.gob.ar/\n')
         f.write('Fuente: elaboración propia en base a datos del INDEC. Censo Nacional de Población, Hogares y Viviendas 2010, procesado con Redatam+SP\n')
         f.write('\n')
         f.write('# Descripcion de {hdf_file}\n')
