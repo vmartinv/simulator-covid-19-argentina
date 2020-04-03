@@ -1,12 +1,11 @@
 #ifndef POPULATION_HPP
 #define POPULATION_HPP
-#include <boost/log/trivial.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include "common.hpp"
 #include "endian.hpp"
 #include "progress_bar.hpp"
 using namespace std;
 
-#define LOG(severity) BOOST_LOG_TRIVIAL(severity)
 
 struct Person{
     unsigned int id, family;

@@ -1,18 +1,12 @@
 #ifndef SEIR_STATE_HPP
 #define SEIR_STATE_HPP
-#include <iostream>
 #include <random>
-#include <algorithm>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <boost/log/trivial.hpp>
+#include "common.hpp"
 #include "endian.hpp"
 #include "progress_bar.hpp"
 #include "population.hpp"
 using namespace std;
-
-#define LOG(severity) BOOST_LOG_TRIVIAL(severity)
 
 enum PersonState{
     SUSCEPTIBLE = 0,
@@ -35,7 +29,7 @@ const string person_state_text[]={
 };
 const int INFECTED_STATES_COUNT = 3;
 const int MAX_AGE = 110;
-static bool is_infected(const PersonState& s){
+inline static bool is_infected(const PersonState& s){
     return s == INFECTED_1 || s == INFECTED_2 || s == INFECTED_3;
 }
 enum Environments{

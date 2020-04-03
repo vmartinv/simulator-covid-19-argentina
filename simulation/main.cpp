@@ -1,4 +1,3 @@
-#include <iostream>
 #include <boost/filesystem.hpp>
 #include "population.hpp"
 #include "seir_simulation.hpp"

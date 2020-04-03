@@ -1,18 +1,12 @@
 #ifndef SEIR_SIMULATION_HPP
 #define SEIR_SIMULATION_HPP
-#include <iostream>
 #include <random>
 #include <algorithm>
 #include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <boost/log/trivial.hpp>
-#include "endian.hpp"
 #include "progress_bar.hpp"
 #include "seir_state.hpp"
 using namespace std;
 
-#define LOG(severity) BOOST_LOG_TRIVIAL(severity)
 #define DEBUG
 
 class SeirSimulation{
