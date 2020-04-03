@@ -16,42 +16,27 @@ CENSO_HDF = os.path.join(DATA_DIR, 'censo-2010', 'censo.hdf5')
 PXLOC = os.path.join(DATA_DIR, 'datosgobar-densidad-poblacion', 'pais.geojson')
 
 class Person:
-    def __init__(self, id, family, zone, edad, sexo, estudia, trabaja):
+    def __init__(self, id, family, zone, edad, sexo, escuela, trabajo):
         self.id = id
         self.family = family
         self.zone = zone
         self.edad = edad
         self.sexo = sexo
-        self.estudia = estudia
-        self.trabaja = trabaja
+        self.escuela = escuela
+        self.trabajo = trabajo
     
     def pack(self):
-        struct_format = '>IIHB???'
-        return struct.pack(struct_format, self.id, self.family, self.zone, int(self.edad), self.sexo == 'Mujer', self.estudia, self.trabaja)
+        struct_format = '>IIHB?II'
+        return struct.pack(struct_format, self.id, self.family, self.zone, int(self.edad), self.sexo == 'Mujer', self.escuela, self.trabajo)
 
 class Population:
     def __init__(self):
         self.people = []
-        self.families = []
-        self.zones = []
     
     def to_dat(self, dat_file):
         with open(dat_file, mode='wb') as fout:
             for p in tqdm(self.people):
                 fout.write(p.pack())
-
-    def to_hdf(self, hdf_file):
-        data = {
-            'id': pd.Series([int(p.id) for p in self.people], dtype='int32'),
-            'family': pd.Series([int(p.family) for p in self.people], dtype='int32'),
-            'zone': pd.Series([int(p.zone) for p in self.people], dtype='int32'),
-            'edad': pd.Series([int(p.edad) for p in self.people], dtype='int8'),
-            'sexo': [p.sexo == 'Mujer' for p in self.people],
-            'estudia': [p.estudia for p in self.people],
-            'trabaja': [p.trabaja for p in self.people],
-        }
-        df = pd.DataFrame(data, columns=data.keys())
-        df.to_hdf(hdf_file, 'population', mode='w')
 
 
 class GenWithDistribution:
@@ -70,6 +55,24 @@ class GenWithDistribution:
             self.cur_index = 0
         self.cur_index += k
         return self.precalc[self.cur_index - k: self.cur_index]
+
+class SchoolIdGenerator:
+    def __init__(self):
+        self.cur_capacity = -1
+        self.cur_size = 0
+        self.cur_idx = 0
+    
+    def _gen_new_school(self):
+        self.cur_capacity = 277 # TODO: User proper school db
+        self.cur_size = 0
+        self.cur_idx += 1
+    
+    def get_school(self):
+        if self.cur_size >= self.cur_capacity:
+            self._gen_new_school()
+        self.cur_size += 1
+        return self.cur_idx
+
 
 def cross_cols(a, b):
     return {c: [f'{c}.{c2}' for c2 in b] for c in a}
@@ -120,6 +123,8 @@ def generate(genpop_dataset = None, frac=1.):
     sexos = {}
     escuelas = {}
     trabajos = {}
+    print("Generating distributions by province...")
+
     print("Generating distributions by deparment...")
     for index, row in tqdm(census.iterrows(), total=len(census)):
         tamanios[row['area']] = GenWithDistribution(tamanios_familia, row)
@@ -130,10 +135,11 @@ def generate(genpop_dataset = None, frac=1.):
         trabajos[row['area']] = {k: GenWithDistribution(v, row) for k, v in edad_cross_trabaja.items()}
 
     print("Generating population...")
+    school_gen = SchoolIdGenerator()
+    num_families = 0
     with tqdm(total=40e6*frac, unit="people") as progress:
-        for index, row in geodata.sample(frac=frac).iterrows():
-            zone_id = len(population.zones)
-            population.zones.append(row['geometry'])
+        for index, (_i, row) in enumerate(geodata.sample(frac=frac).iterrows()):
+            zone_id = index
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
             parentescos_d = parentescos[row['dpto_id']]
             edades_d = edades[row['dpto_id']]
@@ -144,13 +150,12 @@ def generate(genpop_dataset = None, frac=1.):
             for tam_flia in tamanios_flias:
                 tam_flia_num = int(tam_flia.replace('8 y más', str(random.choices(range(8, 16))[0])))
                 parentescos_flia = parentescos_d[tam_flia].get(k=tam_flia_num)
-                family_id = len(population.families)
-                population.families.append([])
+                family_id = num_families
+                num_families += 1
                 for member in parentescos_flia:
                     id = len(population.people)
-                    population.families[-1].append(id)
                     by_parentesco[member].append(id)
-                    population.people.append(Person(id, family_id, zone_id, None, None, False, False))
+                    population.people.append(Person(id, family_id, zone_id, None, None, 0, False))
                     progress.update()
             by_edad = defaultdict(list)
             for parentesco, people in by_parentesco.items():
@@ -164,11 +169,17 @@ def generate(genpop_dataset = None, frac=1.):
                 if int(edadv)>=3:
                     estudian = escuelas_d[edadv].get(len(people))
                     for p,estudiav in zip(people, estudian):
-                        population.people[p].estudia = estudiav == 'Asiste'
+                        if estudiav == 'Asiste':
+                            population.people[p].escuela = school_gen.get_school()
+                        else:
+                            population.people[p].escuela = 0
                 if int(edadv)>=14:
                     trabajan = trabajos_d[edadv].get(len(people))
                     for p,trabajav in zip(people, trabajan):
-                        population.people[p].trabaja = trabajav == 'Ocupado'
+                        if trabajav == 'Ocupado':
+                            population.people[p].trabajo = 1 #TODO: add work enviroments
+                        else:
+                            population.people[p].trabajo = 0
         return population
 
 

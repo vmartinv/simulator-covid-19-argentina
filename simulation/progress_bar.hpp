@@ -17,13 +17,13 @@ private:
 
     inline void display() {
         float progress = (float) ticks / total_ticks;
-        int pos = (int) (bar_width * progress);
+        unsigned pos = (int) (bar_width * progress);
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
         auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now-start_time).count();
 
         std::cout << "[";
 
-        for (int i = 0; i < bar_width; ++i) {
+        for (unsigned int i = 0; i < bar_width; ++i) {
             if (i < pos) std::cout << complete_char;
             else if (i == pos) std::cout << ">";
             else std::cout << incomplete_char;

@@ -1,4 +1,5 @@
 #include <boost/log/trivial.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 #include "endian.hpp"
 #include "progress_bar.hpp"
 using namespace std;
@@ -11,25 +12,24 @@ struct Person{
     unsigned short zone;
     unsigned char edad;
     bool sexo;
-    bool estudia;
-    bool trabaja;
+    unsigned int escuela, trabajo;
 };
 
-ostream& operator<< (ostream& os, Person& p)
+ostream& operator<< (ostream& os, const Person& p)
 {
     os << p.id << ' ';
     os << p.family << ' ';
     os << p.zone << ' ';
     os << int(p.edad) << ' ';
     os << p.sexo << ' ';
-    os << p.estudia << ' ';
-    os << p.trabaja;
+    os << p.escuela << ' ';
+    os << p.trabajo;
     return os;
 }
 
 istream& operator>> (istream& is, Person& p)
 {
-    static const size_t struct_size = 14;
+    static const size_t struct_size = 20;
     unsigned char buffer[struct_size];
     is.read(reinterpret_cast<char*>(buffer), struct_size);
     unsigned char *write_ptr=buffer;
@@ -43,18 +43,20 @@ istream& operator>> (istream& is, Person& p)
     write_ptr+=1;
     p.sexo = from_big_endian<unsigned char>(write_ptr);
     write_ptr+=1;
-    p.estudia = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
-    p.trabaja = from_big_endian<unsigned char>(write_ptr);
-    write_ptr+=1;
+    p.escuela = from_big_endian<uint32_t>(write_ptr);
+    write_ptr+=4;
+    p.trabajo = from_big_endian<uint32_t>(write_ptr);
+    write_ptr+=4;
     return is;
 }
 
 struct Population{
     vector<Person> people;
-    int num_families = 0;
-    int num_zones = 0;
-    char max_age = 0;
+    unsigned num_families = 0;
+    unsigned num_zones = 0;
+    unsigned num_schools = 0;
+    unsigned char max_age = 0;
+    const unsigned NO_SCHOOL = 0;
     Population() {}
     Population(const string &pop_filename){
         LOG(info) << "Loading database " << pop_filename << "...";    
@@ -65,6 +67,12 @@ struct Population{
         assert(people.size() > 0);
         num_families = people.back().family+1;
         num_zones = people.back().zone+1;
+        for (auto p : boost::adaptors::reverse(people)){
+            if(p.escuela!=NO_SCHOOL){
+                num_schools = p.escuela+1;
+                break;
+            }
+        }
         max_age = max_element(begin(people), end(people),
         [] (Person const& s1, Person const& s2) { return s1.edad < s2.edad; })->edad;
         validate();
@@ -73,7 +81,6 @@ struct Population{
     void validate(){
         LOG(info) << "Validating database...";
         ProgressBar progressBar(people.size(), 70);
-        int last_id = -1;
         for(const auto &p : people){
             assert(0 <= p.id && p.id < people.size());
             assert(0 <= p.family && p.family < num_families);

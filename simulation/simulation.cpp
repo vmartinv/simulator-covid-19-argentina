@@ -13,7 +13,7 @@ using namespace std;
 namespace fs = boost::filesystem;
 
 #define LOG(severity) BOOST_LOG_TRIVIAL(severity)
-//#define DEBUG
+#define DEBUG
 
 const fs::path DATA_DIR = fs::path("data") / fs::path("argentina");
 #ifdef DEBUG
@@ -55,12 +55,12 @@ typedef int EnvironmentId;
 
 struct PersonSeirState{
     PersonState state;
-    int index_on_general;
+    unsigned index_on_general;
     EnvironmentId environment_id[ENVIRONMENT_COUNT];
-    int index_on_environment[ENVIRONMENT_COUNT];
+    unsigned index_on_environment[ENVIRONMENT_COUNT];
 };
 struct EnvironmentState{
-    int num_inf[INFECTED_STATES_COUNT];
+    unsigned num_inf[INFECTED_STATES_COUNT];
     vector<PersonId> susceptibles;
 };
 
@@ -101,6 +101,7 @@ struct SeirState{
         }
         environments[HOME].resize(population.num_families);
         environments[NEIGHBOURHOOD].resize(population.num_zones);
+        environments[SCHOOL].resize(population.num_schools);
         for(const auto& p: population.people){
             estado_persona[p.id].environment_id[HOME] = p.family;
             estado_persona[p.id].index_on_environment[HOME] = environments[HOME][p.family].susceptibles.size();
@@ -109,6 +110,10 @@ struct SeirState{
             estado_persona[p.id].environment_id[NEIGHBOURHOOD] = p.zone;
             estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][p.zone].susceptibles.size();
             environments[NEIGHBOURHOOD][p.zone].susceptibles.push_back(p.id);
+
+            estado_persona[p.id].environment_id[SCHOOL] = p.escuela;
+            estado_persona[p.id].index_on_environment[SCHOOL] = environments[SCHOOL][p.escuela].susceptibles.size();
+            environments[SCHOOL][p.escuela].susceptibles.push_back(p.id);
             
             ++progressBar;
         }
@@ -119,7 +124,7 @@ struct SeirState{
         auto edad = population.get(id).edad;
         auto st = estado_persona[id].state;
         vector<PersonId>& vec = general[st][edad];
-        int pos = estado_persona[id].index_on_general;
+        unsigned pos = estado_persona[id].index_on_general;
         if(pos != vec.size()-1){
             vec[pos] = vec.back();
             estado_persona[vec[pos]].index_on_general = pos;
@@ -139,8 +144,7 @@ struct SeirState{
             PersonSeirState& est_p = estado_persona[id];
             if(est_p.environment_id[env]!=-1){
                 vector<PersonId>& vec = environments[env][est_p.environment_id[env]].susceptibles;
-                int pos = est_p.index_on_environment[env];
-                assert(pos!=-1);
+                unsigned pos = est_p.index_on_environment[env];
                 if(pos != vec.size()-1){
                     vec[pos] = vec.back();
                     estado_persona[vec[pos]].index_on_environment[env] = pos;
