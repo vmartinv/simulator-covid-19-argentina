@@ -11,6 +11,12 @@ add_definitions(-DBOOST_LOG_DYN_LINK)
 find_package(Boost 1.67.0 COMPONENTS log_setup log date_time system thread regex chrono filesystem) 
 
 include_directories(${Boost_INCLUDE_DIRS}) 
-add_executable(simulation simulation.cpp endian.hpp progress_bar.hpp population.hpp)
+
+file(GLOB simulation_SRC
+    "*.hpp"
+    "*.cpp"
+)
+add_executable(simulation ${simulation_SRC})
+
 target_compile_features(simulation PRIVATE cxx_std_17) 
 target_link_libraries(simulation ${Boost_LIBRARIES})

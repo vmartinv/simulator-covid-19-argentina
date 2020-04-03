@@ -1,9 +1,10 @@
+#ifndef POPULATION_HPP
+#define POPULATION_HPP
 #include <boost/log/trivial.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include "endian.hpp"
 #include "progress_bar.hpp"
 using namespace std;
-namespace fs = boost::filesystem;
 
 #define LOG(severity) BOOST_LOG_TRIVIAL(severity)
 
@@ -50,7 +51,8 @@ istream& operator>> (istream& is, Person& p)
     return is;
 }
 
-struct Population{
+class Population{
+public:
     vector<Person> people;
     unsigned num_families = 0;
     unsigned num_zones = 0;
@@ -76,6 +78,7 @@ struct Population{
         max_age = max_element(begin(people), end(people),
         [] (Person const& s1, Person const& s2) { return s1.edad < s2.edad; })->edad;
         validate();
+        report();
     }
 
     void validate(){
@@ -98,3 +101,5 @@ struct Population{
         LOG(info) << "Random person: " << people[rand() % people.size()];
     }
 };
+
+#endif

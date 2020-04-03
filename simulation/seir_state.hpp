@@ -1,28 +1,18 @@
+#ifndef SEIR_STATE_HPP
+#define SEIR_STATE_HPP
 #include <iostream>
 #include <random>
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <boost/filesystem.hpp>
 #include <boost/log/trivial.hpp>
 #include "endian.hpp"
 #include "progress_bar.hpp"
 #include "population.hpp"
 using namespace std;
-namespace fs = boost::filesystem;
 
 #define LOG(severity) BOOST_LOG_TRIVIAL(severity)
-#define DEBUG
-
-const fs::path DATA_DIR = fs::path("data") / fs::path("argentina");
-#ifdef DEBUG
-const fs::path FAKE_DB_FILE = fs::path(DATA_DIR) / fs::path("fake_population_small.dat");
-#else
-const fs::path FAKE_DB_FILE = fs::path(DATA_DIR) / fs::path("fake_population.dat");
-#endif
-
-auto uniform = mt19937{random_device{}()};
 
 enum PersonState{
     SUSCEPTIBLE = 0,
@@ -33,6 +23,15 @@ enum PersonState{
     DEAD,
     RECOVERED,
     PERSON_STATE_COUNT
+};
+const string person_state_text[]={
+    "SUSCEPTIBLE",
+    "EXPOSED",
+    "INFECTED_1",
+    "INFECTED_2",
+    "INFECTED_3",
+    "DEAD",
+    "RECOVERED"
 };
 const int INFECTED_STATES_COUNT = 3;
 const int MAX_AGE = 110;
@@ -47,9 +46,6 @@ enum Environments{
     ENVIRONMENT_COUNT
 };
 
-
-
-
 typedef int PersonId;
 typedef int EnvironmentId;
 
@@ -63,7 +59,6 @@ struct EnvironmentState{
     unsigned num_inf[INFECTED_STATES_COUNT];
     vector<PersonId> susceptibles;
 };
-
 
 struct SeirState{
     Population population;
@@ -183,27 +178,4 @@ struct SeirState{
         add_to_general_list(id);
     }
 };
-
-void do_simulation(SeirState &state, int days=256){
-    state.reset();
-    LOG(info) << "Starting simulation...";
-    for(int day = 1; day<=days; day++){
-        for(int age=0; age<=MAX_AGE; age++){
-            vector<PersonId> &i3 = state.general[INFECTED_3][age];
-            vector<PersonId> deaths;
-            int expected_deaths = round(i3.size()*0.01);
-            sample(begin(i3), end(i3), back_inserter(deaths), expected_deaths, uniform);
-            for(const PersonId id: deaths){
-                state.change_state(id, DEAD);
-            }
-        }
-    }
-}
-
-int main(){
-    srand(time(NULL));
-    SeirState state(Population(FAKE_DB_FILE.string()));
-    state.population.report();
-    do_simulation(state);
-    return 0;
-}
+#endif
