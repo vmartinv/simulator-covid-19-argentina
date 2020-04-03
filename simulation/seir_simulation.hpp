@@ -16,37 +16,42 @@ using namespace std;
 #define DEBUG
 
 class SeirSimulation{
-    mt19937 generator = mt19937{random_device{}()};
+    SeirState state;
+    mt19937 generator;
 
-    vector<PersonId> get_delta(const vector<PersonId> &group, const double prob){
+    vector<PersonId> take_with_prob(const vector<PersonId> &group, const double prob){
         vector<PersonId> delta;
         binomial_distribution<int> distribution(group.size(), prob);
         sample(begin(group), end(group), back_inserter(delta), distribution(generator), generator);
         return delta;
     }
-    SeirState state;
+
+    struct Delta{
+        const PersonState src, dst;
+        const vector<PersonId> lst;
+        Delta(const PersonState src, const PersonState dst, const vector<PersonId> lst): src(src), dst(dst), lst(lst) {}
+
+        void apply(SeirState &state) const {
+            for(const PersonId id: lst){
+                state.change_state(id, dst);
+            }
+        }
+    };
+
 public:
-    SeirSimulation(Population population): state(population) {
-        generator.seed(time(NULL));
-    }
+    SeirSimulation(Population population, const unsigned int seed=random_device{}()): state(population), generator(seed) {}
     void run(int days=256){
         state.reset();
         LOG(info) << "Starting simulation...";
         for(int day = 1; day<=days; day++){
+            vector<Delta> deltas;
             for(int age=0; age<=MAX_AGE; age++){
-                vector<PersonId> deaths=get_delta(state.general[SUSCEPTIBLE][age], 0.1);
-                for(const PersonId id: deaths){
-                    state.change_state(id, DEAD);
-                }
+                deltas.push_back(Delta(SUSCEPTIBLE, DEAD, take_with_prob(state.general[SUSCEPTIBLE][age], 0.1)));
             }
-            auto alive_count = 0;
-            for(auto st=0; st<PERSON_STATE_COUNT; st++){
-                if (st!=DEAD){
-                    for(auto age=0; age<=MAX_AGE; age++){
-                        alive_count += state.general[st][age].size();
-                    }
-                }
+            for(const Delta& d: deltas){
+                d.apply(state);
             }
+            auto alive_count = state.count_alive();
             if(alive_count){
                 LOG(info) << "Day " << day;
                 LOG(info) << "People alive: " << alive_count;

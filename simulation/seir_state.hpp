@@ -177,5 +177,17 @@ struct SeirState{
         }
         add_to_general_list(id);
     }
+
+    unsigned count_alive(){
+        unsigned alive_count = 0;
+        for(auto st=0; st<PERSON_STATE_COUNT; st++){
+            if (st!=DEAD){
+                for(auto age=0; age<=MAX_AGE; age++){
+                    alive_count += general[st][age].size();
+                }
+            }
+        }
+        return alive_count;
+    }
 };
 #endif
