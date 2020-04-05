@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <vector>
 #include <thread>
+#include <chrono>
 #include "progress_bar.hpp"
 #include "seir_state.hpp"
 using namespace std;
+using namespace std::chrono; 
 
 class SeirSimulation{
     SeirState state;
@@ -101,6 +103,7 @@ class SeirSimulation{
 
     void cases_evolution_step(int age){
         add_delta_safe(Delta(EXPOSED, INFECTED_1, pick_with_probability(state.general[EXPOSED][age], fraction_become_mild)));
+        
         add_delta_safe(Delta(INFECTED_1, RECOVERED, pick_with_probability(state.general[INFECTED_1][age], fraction_recover_from_mild)));
         add_delta_safe(Delta(INFECTED_1, INFECTED_2, pick_with_probability(state.general[INFECTED_1][age], fraction_severe_from_mild)));
 
@@ -122,6 +125,7 @@ class SeirSimulation{
 
     void step(int day){
         report(day);
+        
         deltas.clear(); 
         vector<thread> steps;
         steps.push_back(thread(&SeirSimulation::introduce_new_cases_step, this, day));
@@ -149,7 +153,11 @@ public:
         state.reset();
         LOG(info) << "Starting simulation...";
         for(int day = 1; day<=days; day++){
+            auto start = high_resolution_clock::now(); 
             step(day);
+            auto stop = high_resolution_clock::now(); 
+            auto duration = duration_cast<milliseconds>(stop - start); 
+            LOG(info) << "TIME TAKEN: " << duration.count() << "ms"; 
         }  
     }
 };
