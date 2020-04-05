@@ -12,7 +12,7 @@ const fs::path FAKE_DB_FILE = fs::path(DATA_DIR) / fs::path("fake_population.dat
 #endif
 
 int main(){
-    SeirSimulation simulation(Population(FAKE_DB_FILE.string()));
+    SeirSimulation simulation(Population(FAKE_DB_FILE.string()), 23415);
     simulation.run();
     return 0;
 }

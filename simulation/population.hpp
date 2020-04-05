@@ -50,6 +50,9 @@ istream& operator>> (istream& is, Person& p)
     return is;
 }
 
+const int MAX_AGE = 110;
+typedef unsigned PersonId;
+
 class Population{
 public:
     vector<Person> people;

@@ -27,8 +27,6 @@ const string person_state_text[]={
     "DEAD",
     "RECOVERED"
 };
-const int INFECTED_STATES_COUNT = 3;
-const int MAX_AGE = 110;
 inline static bool is_infected(const PersonState& s){
     return s == INFECTED_1 || s == INFECTED_2 || s == INFECTED_3;
 }
@@ -39,8 +37,12 @@ enum Environments{
     NEIGHBOURHOOD,
     ENVIRONMENT_COUNT
 };
-
-typedef int PersonId;
+const string environment_text[]={
+    "HOME",
+    "SCHOOL",
+    "WORK",
+    "NEIGHBOURHOOD",
+};
 typedef int EnvironmentId;
 
 struct PersonSeirState{
@@ -50,7 +52,7 @@ struct PersonSeirState{
     unsigned index_on_environment[ENVIRONMENT_COUNT];
 };
 struct EnvironmentState{
-    unsigned num_inf[INFECTED_STATES_COUNT];
+    unsigned num[PERSON_STATE_COUNT];
     vector<PersonId> susceptibles;
 };
 
@@ -100,10 +102,11 @@ struct SeirState{
             estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][p.zone].susceptibles.size();
             environments[NEIGHBOURHOOD][p.zone].susceptibles.push_back(p.id);
 
-            estado_persona[p.id].environment_id[SCHOOL] = p.escuela;
-            estado_persona[p.id].index_on_environment[SCHOOL] = environments[SCHOOL][p.escuela].susceptibles.size();
-            environments[SCHOOL][p.escuela].susceptibles.push_back(p.id);
-            
+            if(p.escuela!=0){
+                estado_persona[p.id].environment_id[SCHOOL] = p.escuela;
+                estado_persona[p.id].index_on_environment[SCHOOL] = environments[SCHOOL][p.escuela].susceptibles.size();
+                environments[SCHOOL][p.escuela].susceptibles.push_back(p.id);
+            }
             ++progressBar;
         }
         progressBar.done();
@@ -114,7 +117,7 @@ struct SeirState{
         auto st = estado_persona[id].state;
         vector<PersonId>& vec = general[st][edad];
         unsigned pos = estado_persona[id].index_on_general;
-        if(pos != vec.size()-1){
+        if(pos != vec.size()-1 && vec.size()>1){
             vec[pos] = vec.back();
             estado_persona[vec[pos]].index_on_general = pos;
         }
@@ -129,26 +132,29 @@ struct SeirState{
     }
 
     void remove_from_susceptible_envs_lists(const PersonId id){
+        PersonSeirState& est_p = estado_persona[id];
         for(int env=0; env<ENVIRONMENT_COUNT; env++){
-            PersonSeirState& est_p = estado_persona[id];
             if(est_p.environment_id[env]!=-1){
                 vector<PersonId>& vec = environments[env][est_p.environment_id[env]].susceptibles;
                 unsigned pos = est_p.index_on_environment[env];
-                if(pos != vec.size()-1){
+                assert(pos<vec.size());
+                assert(vec[pos]==id);
+                if(pos != vec.size()-1 && vec.size()>1){
                     vec[pos] = vec.back();
                     estado_persona[vec[pos]].index_on_environment[env] = pos;
                 }
                 vec.pop_back();
+                est_p.index_on_environment[env] = -1;
             }
         }
     }
 
     void delta_infected_envs_count(const PersonId id, const int delta){
+        PersonSeirState& est_p = estado_persona[id];
         for(int env=0; env<ENVIRONMENT_COUNT; env++){
-            PersonSeirState& est_p = estado_persona[id];
             if(est_p.environment_id[env]!=-1){
-                EnvironmentState &env_st = environments[env][estado_persona[id].environment_id[env]];
-                env_st.num_inf[est_p.state]+= delta;
+                EnvironmentState &env_st = environments[env][est_p.environment_id[env]];
+                env_st.num[INFECTED_1] += delta;
             }
         }
     }
@@ -172,16 +178,12 @@ struct SeirState{
         add_to_general_list(id);
     }
 
-    unsigned count_alive(){
-        unsigned alive_count = 0;
-        for(auto st=0; st<PERSON_STATE_COUNT; st++){
-            if (st!=DEAD){
-                for(auto age=0; age<=MAX_AGE; age++){
-                    alive_count += general[st][age].size();
-                }
-            }
+    unsigned count_state(const PersonState& st){
+        unsigned count = 0;
+        for(auto age=0; age<=MAX_AGE; age++){
+            count += general[st][age].size();
         }
-        return alive_count;
+        return count;
     }
 };
 #endif
