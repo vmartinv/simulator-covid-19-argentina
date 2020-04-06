@@ -56,11 +56,11 @@ struct EnvironmentState{
     vector<PersonId> susceptibles;
 };
 
-struct SeirState{
+class SeirState{
+public:
     Population population;
     vector<PersonId> general[PERSON_STATE_COUNT][MAX_AGE+1];
     vector<EnvironmentState> environments[ENVIRONMENT_COUNT];
-    vector<PersonSeirState> estado_persona;
 
     SeirState(Population population): population(population) {
     }
@@ -84,6 +84,37 @@ struct SeirState{
         progressBar.done();
         generate_environments();
     }
+    
+    void change_state(const PersonId &id, const PersonState &nw){
+        const PersonState old = estado_persona[id].state;
+        if(old==nw){
+            return;
+        }
+        remove_from_general_list(id);
+        if(old==SUSCEPTIBLE){
+            remove_from_susceptible_envs_lists(id);
+        }
+        if(is_infected(old)){
+            delta_infected_envs_count(id, -1);
+        }
+        estado_persona[id].state = nw;
+        if(is_infected(nw)){
+            delta_infected_envs_count(id, 1);
+        }
+        add_to_general_list(id);
+    }
+
+    unsigned count_state(const PersonState& st){
+        unsigned count = 0;
+        for(auto age=0; age<=MAX_AGE; age++){
+            count += general[st][age].size();
+        }
+        return count;
+    }
+private:
+
+
+    vector<PersonSeirState> estado_persona;
     void generate_environments(){
         LOG(info) << "Generating environments...";
         ProgressBar progressBar(population.people.size(), 70);
@@ -157,33 +188,6 @@ struct SeirState{
                 env_st.num[INFECTED_1] += delta;
             }
         }
-    }
-    
-    void change_state(const PersonId &id, const PersonState &nw){
-        const PersonState old = estado_persona[id].state;
-        if(old==nw){
-            return;
-        }
-        remove_from_general_list(id);
-        if(old==SUSCEPTIBLE){
-            remove_from_susceptible_envs_lists(id);
-        }
-        if(is_infected(old)){
-            delta_infected_envs_count(id, -1);
-        }
-        estado_persona[id].state = nw;
-        if(is_infected(nw)){
-            delta_infected_envs_count(id, 1);
-        }
-        add_to_general_list(id);
-    }
-
-    unsigned count_state(const PersonState& st){
-        unsigned count = 0;
-        for(auto age=0; age<=MAX_AGE; age++){
-            count += general[st][age].size();
-        }
-        return count;
     }
 };
 #endif
