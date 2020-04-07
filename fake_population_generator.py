@@ -14,6 +14,7 @@ import struct
 DATA_DIR = os.path.join('data', 'argentina')
 CENSO_HDF = os.path.join(DATA_DIR, 'censo-2010', 'censo.hdf5')
 PXLOC = os.path.join(DATA_DIR, 'datosgobar-densidad-poblacion', 'pais.geojson')
+SCHOOL_HDF = os.path.join(DATA_DIR, 'ministerio-educacion', 'matricula_y_secciones.hdf')
 
 class Person:
     def __init__(self, id, family, zone, edad, sexo, escuela, trabajo):
@@ -57,13 +58,17 @@ class GenWithDistribution:
         return self.precalc[self.cur_index - k: self.cur_index]
 
 class SchoolIdGenerator:
-    def __init__(self):
+    def __init__(self, mean):
+        try:
+            self.mean = int(round(mean))
+        except:
+            self.mean = 100 #TODO: WHY I GET NAN
         self.cur_capacity = -1
         self.cur_size = 0
         self.cur_idx = 0
     
     def _gen_new_school(self):
-        self.cur_capacity = 277 # TODO: User proper school db
+        self.cur_capacity = self.mean
         self.cur_size = 0
         self.cur_idx += 1
     
@@ -77,7 +82,7 @@ class SchoolIdGenerator:
 def cross_cols(a, b):
     return {c: [f'{c}.{c2}' for c2 in b] for c in a}
 
-def load_population_census(location_file = PXLOC, census_file = CENSO_HDF):
+def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schooldb_file = SCHOOL_HDF):
     geodata = gpd.read_file(location_file, encoding='utf-8')
     #geodata['departamen'] = [normalize_dpto_name(n) for n in geodata['departamen']]
     geodata['area'] = [float(a) for a in geodata['area']]
@@ -98,6 +103,21 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF):
             table = hdf.select(k)
             # validate_dpto_indexes(table['area'], geodata['dpto_id'])
             tables.append(table)
+    
+    schooldb = pd.read_hdf(schooldb_file, 'matricula_y_secciones')
+    schooldb = schooldb.replace(to_replace="Ciudad de Buenos Aires", value="Ciudad Autónoma de Buenos Aires")
+    count_cols = list(filter(lambda s: s.startswith('Alumnos con Sobreedad') or s.startswith('Repitentes') or s.startswith('Matrícula.'), schooldb.columns))
+    schooldb['total_alumnos'] = schooldb.loc[:,count_cols].sum(axis=1)
+    schooldb = schooldb[['Provincia', 'Ámbito', 'total_alumnos']].groupby(['Provincia', 'Ámbito']).mean().reset_index()
+    schooldb = schooldb.pivot_table('total_alumnos', ['Provincia'], 'Ámbito').reset_index()
+    PXLOCDPTO = os.path.join(DATA_DIR, 'indec', 'pxdptodatosok.shp')
+    provdata = gpd.read_file(PXLOCDPTO, encoding='utf-8')
+    provdata['link'] = [int(n) for n in provdata['link']]
+    schooldb = pd.merge(provdata[['link', 'provincia']], schooldb, left_on='provincia', right_on='Provincia')
+    schooldb.rename(columns={'link':'area', 'Rural': 'Alumnos rural', 'Urbano': 'Alumnos urbano'}, inplace=True)
+    schooldb = schooldb[['area', 'Alumnos rural', 'Alumnos urbano']]
+    tables.append(schooldb)
+
     return geodata, functools.reduce(lambda a,b: pd.merge(a, b, how='inner', on='area'), tables)
 
 def generate(genpop_dataset = None, frac=1.):
@@ -112,22 +132,28 @@ def generate(genpop_dataset = None, frac=1.):
     escuela = ['Asiste', 'Asistió', 'Nunca asistió']
     nivel_educactivo = ['Asiste', 'Asistió', 'Nunca asistió']
     trabaja = ['Desocupado', 'Inactivo', 'Ocupado']
+    urbano_rural = ['Rural agrupado', 'Rural disperso', 'Urbano']
+    tamanio_escuela = ['Alumnos rural', 'Alumnos urbano']
     tamanio_cross_parentescos = cross_cols(tamanios_familia, parentescos)
     parentescos_cross_edad = cross_cols(parentescos, edad)
     parentescos_cross_sexo = cross_cols(parentescos, sexo)
     edad_cross_escuela = cross_cols(filter(lambda e: int(e)>=3, edad), escuela)
     edad_cross_trabaja = cross_cols(filter(lambda e: int(e)>=14, edad), trabaja)
+    urbano_rurales = {}
+    tamanios_escuelas = {}
     tamanios = {}
     parentescos = {}
     edades = {}
     sexos = {}
     escuelas = {}
     trabajos = {}
-    print("Generating distributions by province...")
 
     print("Generating distributions by deparment...")
     for index, row in tqdm(census.iterrows(), total=len(census)):
+        tamanios_escuelas[row['area']] = {c:row[c] for c in tamanio_escuela}
+        print(tamanios_escuelas[row['area']])
         tamanios[row['area']] = GenWithDistribution(tamanios_familia, row)
+        urbano_rurales[row['area']] = GenWithDistribution(urbano_rural, row)
         parentescos[row['area']] = {k: GenWithDistribution(v, row) for k, v in tamanio_cross_parentescos.items()}
         edades[row['area']] = {k: GenWithDistribution(v, row) for k, v in parentescos_cross_edad.items()}
         sexos[row['area']] = {k: GenWithDistribution(v, row) for k, v in parentescos_cross_sexo.items()}
@@ -135,11 +161,14 @@ def generate(genpop_dataset = None, frac=1.):
         trabajos[row['area']] = {k: GenWithDistribution(v, row) for k, v in edad_cross_trabaja.items()}
 
     print("Generating population...")
-    school_gen = SchoolIdGenerator()
     num_families = 0
+    es_flia_urbana = []
     with tqdm(total=40e6*frac, unit="people") as progress:
         for index, (_i, row) in enumerate(geodata.sample(frac=frac).iterrows()):
             zone_id = index
+            school_gen_urb = SchoolIdGenerator(tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
+            school_gen_rural = SchoolIdGenerator(tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
+            rural_urbano_flias = urbano_rurales[row['dpto_id']].get(k = int(row['hogares']))
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
             parentescos_d = parentescos[row['dpto_id']]
             edades_d = edades[row['dpto_id']]
@@ -147,10 +176,12 @@ def generate(genpop_dataset = None, frac=1.):
             escuelas_d = escuelas[row['dpto_id']]
             trabajos_d = trabajos[row['dpto_id']]
             by_parentesco = defaultdict(list)
-            for tam_flia in tamanios_flias:
+            for tam_flia, urbano in zip(tamanios_flias, rural_urbano_flias):
+                urbano = urbano=='Urbano'
                 tam_flia_num = int(tam_flia.replace('8 y más', str(random.choices(range(8, 16))[0])))
                 parentescos_flia = parentescos_d[tam_flia].get(k=tam_flia_num)
                 family_id = num_families
+                es_flia_urbana.append(urbano)
                 num_families += 1
                 for member in parentescos_flia:
                     id = len(population.people)
@@ -169,8 +200,9 @@ def generate(genpop_dataset = None, frac=1.):
                 if int(edadv)>=3:
                     estudian = escuelas_d[edadv].get(len(people))
                     for p,estudiav in zip(people, estudian):
+                        es_urbana = es_flia_urbana[population.people[p].family]
                         if estudiav == 'Asiste':
-                            population.people[p].escuela = school_gen.get_school()
+                            population.people[p].escuela = school_gen_urb.get_school() if es_urbana else school_gen_rural.get_school()
                         else:
                             population.people[p].escuela = 0
                 if int(edadv)>=14:
