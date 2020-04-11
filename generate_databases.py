@@ -55,13 +55,15 @@ def store_densidad():
 
 def store_fake_population():
     POP_SMALL_FILE = os.path.join(DATA_DIR, 'fake_population_small.dat')
-    if not os.path.exists(POP_SMALL_FILE):
+    POP_SMALL_FILE_JSON = POP_SMALL_FILE.replace('.dat', '.json')
+    if not os.path.exists(POP_SMALL_FILE) or not os.path.exists(POP_SMALL_FILE_JSON):
         print(f"Generating small fake population to {POP_SMALL_FILE}...")
-        fake_population_generator.generate(frac=0.01).to_dat(POP_SMALL_FILE)
+        fake_population_generator.generate(frac=0.01).to_dat(POP_SMALL_FILE, POP_SMALL_FILE_JSON)
     POP_FILE = os.path.join(DATA_DIR, 'fake_population.dat')
-    if not os.path.exists(POP_FILE):
+    POP_FILE_JSON = POP_FILE.replace('.dat', '.json')
+    if not os.path.exists(POP_FILE) or not os.path.exists(POP_FILE_JSON):
         print(f"Generating fake population to {POP_FILE}...")
-        fake_population_generator.generate().to_dat(POP_FILE)
+        fake_population_generator.generate().to_dat(POP_FILE, POP_FILE_JSON)
 
 def store_schools():
     EDUCACION_DIR = os.path.join(DATA_DIR, "ministerio-educacion")

@@ -8,8 +8,11 @@ import geopandas as gpd
 from utils.utils import normalize_dpto_name, validate_dpto_indexes
 import os
 import re
+import json
+import numpy as np
 from collections import defaultdict
 import struct
+from scipy.spatial import cKDTree
 
 DATA_DIR = os.path.join('data', 'argentina')
 CENSO_HDF = os.path.join(DATA_DIR, 'censo-2010', 'censo.hdf5')
@@ -33,8 +36,13 @@ class Person:
 class Population:
     def __init__(self):
         self.people = []
+        self.nearest_zones = []
     
-    def to_dat(self, dat_file):
+    def to_dat(self, dat_file, json_file):
+        with open(json_file, 'w') as fout:
+            json.dump({
+                'nearest_zones': self.nearest_zones,
+            }, fout)
         with open(dat_file, mode='wb') as fout:
             for p in tqdm(self.people):
                 fout.write(p.pack())
@@ -89,6 +97,16 @@ class AlumnSchoolIdGenerator:
 
 def cross_cols(a, b):
     return {c: [f'{c}.{c2}' for c2 in b] for c in a}
+
+def nearests_zones(geodata, upper_bound=5000, max_nearests=1200):
+    #https://www.eye4software.com/hydromagic/documentation/supported-map-grids/Argentina
+    geodata.to_crs(epsg=5349,inplace=True)
+    centroids = np.array(list(zip(geodata.geometry.centroid.x, geodata.geometry.centroid.y)) )
+    btree = cKDTree(centroids)
+    dist, idx = btree.query(centroids, k=max_nearests, distance_upper_bound=upper_bound)
+    idxs = np.stack([dist, idx], axis=2)
+    nearests = [[int(id) for d,id in plist if d>1e-9 and d<max_nearests] for plist in idxs]
+    return nearests
 
 def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schooldb_file = SCHOOL_HDF):
     geodata = gpd.read_file(location_file, encoding='utf-8')
@@ -155,6 +173,9 @@ def generate(genpop_dataset = None, frac=1.):
     sexos = {}
     escuelas = {}
     trabajos = {}
+    geodata = geodata.sample(frac=frac)
+    print("Calculating nearests zones...")
+    population.nearest_zones = nearests_zones(geodata, 5000, 1200)
 
     print("Generating distributions by deparment...")
     for index, row in tqdm(census.iterrows(), total=len(census)):
@@ -172,7 +193,7 @@ def generate(genpop_dataset = None, frac=1.):
     es_flia_urbana = []
     school_gen = SchoolIdGenerator()
     with tqdm(total=40e6*frac, unit="people") as progress:
-        for index, (_i, row) in enumerate(geodata.sample(frac=frac).iterrows()):
+        for index, (_i, row) in enumerate(geodata.iterrows()):
             zone_id = index
             school_gen_urb = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
             school_gen_rural = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
@@ -224,7 +245,7 @@ def generate(genpop_dataset = None, frac=1.):
 
 
 def main():
-    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'))
+    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'))
 
 if __name__ == "__main__":
     main()
