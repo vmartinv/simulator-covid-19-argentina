@@ -97,8 +97,10 @@ class SeirSimulation{
     }
 
     void add_delta_safe(const Delta& delta){
-        lock_guard<mutex> lk(deltas_mutex);
-        deltas.push_back(delta);
+        if(!delta.lst.empty()){
+            lock_guard<mutex> lk(deltas_mutex);
+            deltas.push_back(delta);
+        }
     }
 
     void cases_evolution_step(int age){
@@ -123,10 +125,21 @@ class SeirSimulation{
         LOG(info) << "TOTAL ALIVE: " << alive_count;
     }
 
-    void step(int day){
-        report(day);
-        
-        deltas.clear(); 
+    void step_serial(int day){
+        deltas.clear();
+        introduce_new_cases_step(day);
+        home_contact_step();
+        school_contact_step();
+        neighbourhood_contact_step();
+        for(int age=0; age<=MAX_AGE; age++){
+            cases_evolution_step(age);
+        }
+        for(const Delta& d: deltas){
+            d.apply(state);
+        }
+    }
+    void step_parallel(int day){
+        deltas.clear();
         vector<thread> steps;
         steps.push_back(thread(&SeirSimulation::introduce_new_cases_step, this, day));
         steps.push_back(thread(&SeirSimulation::home_contact_step, this));
@@ -149,12 +162,17 @@ class SeirSimulation{
 public:
     SeirSimulation(Population population, const unsigned int seed=random_device{}()): state(population), generator(seed) {}
 
-    void run(int days=256){
+    void run(int days=numeric_limits<int>::max()){
         state.reset();
         LOG(info) << "Starting simulation...";
         for(int day = 1; day<=days; day++){
             auto start = high_resolution_clock::now(); 
-            step(day);
+            report(day);
+#ifdef DEBUG
+            step_serial(day);
+#else
+            step_parallel(day);
+#endif
             auto stop = high_resolution_clock::now(); 
             auto duration = duration_cast<milliseconds>(stop - start); 
             LOG(info) << "TIME TAKEN: " << duration.count() << "ms"; 

@@ -60,7 +60,7 @@ public:
     unsigned num_zones = 0;
     unsigned num_schools = 0;
     unsigned char max_age = 0;
-    const unsigned NO_SCHOOL = 0;
+    static const unsigned NO_SCHOOL = 0;
     Population() {}
     Population(const string &pop_filename){
         LOG(info) << "Loading database " << pop_filename << "...";    
@@ -71,12 +71,8 @@ public:
         assert(people.size() > 0);
         num_families = people.back().family+1;
         num_zones = people.back().zone+1;
-        for (auto p : boost::adaptors::reverse(people)){
-            if(p.escuela!=NO_SCHOOL){
-                num_schools = p.escuela+1;
-                break;
-            }
-        }
+        num_schools = max_element(begin(people), end(people),
+        [] (Person const& s1, Person const& s2) { return s1.escuela < s2.escuela; })->escuela+1;
         max_age = max_element(begin(people), end(people),
         [] (Person const& s1, Person const& s2) { return s1.edad < s2.edad; })->edad;
         validate();

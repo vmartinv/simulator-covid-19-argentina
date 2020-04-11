@@ -58,7 +58,15 @@ class GenWithDistribution:
         return self.precalc[self.cur_index - k: self.cur_index]
 
 class SchoolIdGenerator:
-    def __init__(self, mean):
+    def __init__(self):
+        self.cur_idx = 0
+    def get_school(self):
+        self.cur_idx += 1
+        return self.cur_idx
+
+class AlumnSchoolIdGenerator:
+    def __init__(self, school_gen, mean):
+        self.school_gen = school_gen
         try:
             self.mean = int(round(mean))
         except:
@@ -70,7 +78,7 @@ class SchoolIdGenerator:
     def _gen_new_school(self):
         self.cur_capacity = self.mean
         self.cur_size = 0
-        self.cur_idx += 1
+        self.cur_idx = self.school_gen.get_school()
     
     def get_school(self):
         if self.cur_size >= self.cur_capacity:
@@ -151,7 +159,6 @@ def generate(genpop_dataset = None, frac=1.):
     print("Generating distributions by deparment...")
     for index, row in tqdm(census.iterrows(), total=len(census)):
         tamanios_escuelas[row['area']] = {c:row[c] for c in tamanio_escuela}
-        print(tamanios_escuelas[row['area']])
         tamanios[row['area']] = GenWithDistribution(tamanios_familia, row)
         urbano_rurales[row['area']] = GenWithDistribution(urbano_rural, row)
         parentescos[row['area']] = {k: GenWithDistribution(v, row) for k, v in tamanio_cross_parentescos.items()}
@@ -163,11 +170,12 @@ def generate(genpop_dataset = None, frac=1.):
     print("Generating population...")
     num_families = 0
     es_flia_urbana = []
+    school_gen = SchoolIdGenerator()
     with tqdm(total=40e6*frac, unit="people") as progress:
         for index, (_i, row) in enumerate(geodata.sample(frac=frac).iterrows()):
             zone_id = index
-            school_gen_urb = SchoolIdGenerator(tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
-            school_gen_rural = SchoolIdGenerator(tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
+            school_gen_urb = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
+            school_gen_rural = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
             rural_urbano_flias = urbano_rurales[row['dpto_id']].get(k = int(row['hogares']))
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
             parentescos_d = parentescos[row['dpto_id']]

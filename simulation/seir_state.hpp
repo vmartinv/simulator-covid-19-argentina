@@ -133,7 +133,7 @@ private:
             estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][p.zone].susceptibles.size();
             environments[NEIGHBOURHOOD][p.zone].susceptibles.push_back(p.id);
 
-            if(p.escuela!=0){
+            if(p.escuela!=Population::NO_SCHOOL){
                 estado_persona[p.id].environment_id[SCHOOL] = p.escuela;
                 estado_persona[p.id].index_on_environment[SCHOOL] = environments[SCHOOL][p.escuela].susceptibles.size();
                 environments[SCHOOL][p.escuela].susceptibles.push_back(p.id);

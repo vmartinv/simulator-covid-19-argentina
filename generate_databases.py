@@ -90,8 +90,8 @@ def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
     store_densidad()
-    store_fake_population()
     store_schools()
+    store_fake_population()
 
 if __name__ == "__main__":
     store_all()
