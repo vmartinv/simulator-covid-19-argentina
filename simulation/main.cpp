@@ -1,6 +1,7 @@
 #include <boost/filesystem.hpp>
 #include "common.hpp"
 #include "population.hpp"
+#include "disease_parameters.hpp"
 #include "seir_simulation.hpp"
 using namespace std;
 namespace fs = boost::filesystem;
@@ -20,7 +21,7 @@ int main(){
 #else
     LOG(info) << "Running in Release mode";
 #endif
-    SeirSimulation simulation(Population(FAKE_DB_FILE.string(), FAKE_DB_JSON_FILE.string()), 23415);
+    SeirSimulation simulation(Population(FAKE_DB_FILE.string(), FAKE_DB_JSON_FILE.string()), DiseaseParameters(), 23415);
     simulation.run(30);
     return 0;
 }
