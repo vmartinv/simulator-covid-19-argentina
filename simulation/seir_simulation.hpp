@@ -14,21 +14,42 @@ using namespace std::chrono;
 using json = nlohmann::json;
 
 class SeirSimulation{
+    enum TransitionReason{
+        HOME_CONTACT = 0,
+        SCHOOL_CONTACT,
+        WORK_CONTACT,
+        NEIGHBOURHOOD_CONTACT,
+        INTER_NEIGHBOURHOOD_CONTACT,
+        IMPORTED_CASE,
+        UNDEFINED,
+        TRANSITION_REASONS_COUNT
+    };
+    static constexpr const char *transition_reason_text[] = {
+        "HOME_CONTACT",
+        "SCHOOL_CONTACT",
+        "WORK_CONTACT",
+        "NEIGHBOURHOOD_CONTACT",
+        "INTER_NEIGHBOURHOOD_CONTACT",
+        "IMPORTED_CASE",
+        "UNDEFINED"
+    };
 
     struct Delta{
         const PersonState src, dst;
+        const TransitionReason reason;
         const vector<PersonId> lst;
-        Delta(const PersonState src, const PersonState dst, const vector<PersonId> lst): src(src), dst(dst), lst(lst) {}
+        Delta(const PersonState src, const PersonState dst, const TransitionReason reason, const vector<PersonId> lst): src(src), dst(dst), reason(reason), lst(lst) {}
 
-        void apply(SeirState &state) const {
+        void apply(SeirState &state, int *transitions_count) const {
             for(const PersonId id: lst){
                 if(state.get_estado_persona(id)==src){
                     state.change_state(id, dst);
+                    transitions_count[static_cast<int>(reason)]++;
                 }
             }
         }
     };
-
+    int transitions_count[TRANSITION_REASONS_COUNT];
     SeirState state;
     const DiseaseParameters disease;
     mt19937 generator;
@@ -62,23 +83,23 @@ class SeirSimulation{
             const int final_age=40;
             const int age_range=final_age-initial_age+1;
             for(int age=initial_age; age<final_age; age++){
-                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_uniform(state.general[SUSCEPTIBLE][age], ceil(new_cases/static_cast<double>(age_range)))));
+                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, IMPORTED_CASE, pick_uniform(state.general[SUSCEPTIBLE][age], ceil(new_cases/static_cast<double>(age_range)))));
             }
         }
     }
     void home_contact_step(){
         for(const auto& env_st: state.environments[HOME]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.01*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, HOME_CONTACT, pick_with_probability(env_st.susceptibles, 0.01*env_st.num[INFECTED_1])));
         }
     }
     void school_contact_step(){
         for(const auto& env_st: state.environments[SCHOOL]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.001*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, SCHOOL_CONTACT, pick_with_probability(env_st.susceptibles, 0.001*env_st.num[INFECTED_1])));
         }
     }
     void neighbourhood_contact_step(){
         for(const auto& env_st: state.environments[NEIGHBOURHOOD]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.0001*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.0001*env_st.num[INFECTED_1])));
         }
     }
     void inter_neighbourhood_contact_step(){
@@ -87,7 +108,7 @@ class SeirSimulation{
             for(const auto j: state.population.nearests_zones[i]){
                 auto &env_st2 = state.environments[NEIGHBOURHOOD][j];
                 assert(i!=j);
-                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.0001*env_st2.num[INFECTED_1])));
+                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, INTER_NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.0001*env_st2.num[INFECTED_1])));
             }
         }
     }
@@ -100,28 +121,35 @@ class SeirSimulation{
     }
 
     void cases_evolution_step(int age){
-        add_delta_safe(Delta(EXPOSED, INFECTED_1, pick_with_probability(state.general[EXPOSED][age], disease.fraction_become_mild)));
+        add_delta_safe(Delta(EXPOSED, INFECTED_1, UNDEFINED, pick_with_probability(state.general[EXPOSED][age], disease.fraction_become_mild)));
         
-        add_delta_safe(Delta(INFECTED_1, RECOVERED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_recover_from_mild)));
-        add_delta_safe(Delta(INFECTED_1, INFECTED_2, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_severe_from_mild)));
+        add_delta_safe(Delta(INFECTED_1, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_recover_from_mild)));
+        add_delta_safe(Delta(INFECTED_1, INFECTED_2, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_severe_from_mild)));
 
-        add_delta_safe(Delta(INFECTED_2, RECOVERED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_recover_from_severe)));
-        add_delta_safe(Delta(INFECTED_2, INFECTED_3, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_critical_from_severe)));
+        add_delta_safe(Delta(INFECTED_2, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_recover_from_severe)));
+        add_delta_safe(Delta(INFECTED_2, INFECTED_3, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_critical_from_severe)));
 
-        add_delta_safe(Delta(INFECTED_3, RECOVERED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_recover_from_critical)));
-        add_delta_safe(Delta(INFECTED_3, DEAD, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_death_from_critical)));
+        add_delta_safe(Delta(INFECTED_3, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_recover_from_critical)));
+        add_delta_safe(Delta(INFECTED_3, DEAD, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_death_from_critical)));
     }
 
-    void make_day_report(unsigned day, json &report){
+    void make_day_report(unsigned day, unsigned duration, json &report){
         LOG(info) << "Day " << day;
         report["day"].push_back(day);
+        report["compute_time_ms"].push_back(duration);
         for(auto st=0; st<PERSON_STATE_COUNT; st++){
             unsigned count = state.count_state(static_cast<PersonState>(st));
             report[person_state_text[st]].push_back(count);
             LOG(info) << person_state_text[st] << ": " << count;
         }
+        for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
+            unsigned count = transitions_count[tr];
+            report[transition_reason_text[tr]].push_back(count);
+            LOG(info) << transition_reason_text[tr] << ": " << count;
+        }
         auto alive_count = state.population.people.size()-state.count_state(DEAD);
         LOG(info) << "TOTAL ALIVE: " << alive_count;
+        LOG(info) << "TIME TAKEN: " << duration << "ms"; 
     }
 
     void step_serial(unsigned day){
@@ -135,7 +163,7 @@ class SeirSimulation{
             cases_evolution_step(age);
         }
         for(const Delta& d: deltas){
-            d.apply(state);
+            d.apply(state, transitions_count);
         }
     }
     void step_parallel(unsigned day){
@@ -153,14 +181,18 @@ class SeirSimulation{
             t.join();
         }
         for(const Delta& d: deltas){
-            d.apply(state);
+            d.apply(state, transitions_count);
         }
     }
     json create_empty_report(){
         json j;
         j["day"] = vector<int>();
+        j["compute_time_ms"] = vector<int>();
         for(int i=0; i<PERSON_STATE_COUNT; i++){
             j[person_state_text[i]]=vector<int>();
+        }
+        for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
+            j[transition_reason_text[tr]]=vector<int>();
         }
         return j;
     }
@@ -174,7 +206,7 @@ public:
         LOG(info) << "Starting simulation...";
         for(unsigned day = 1; day<=days; day++){
             auto start = high_resolution_clock::now(); 
-            make_day_report(day, report);
+            memset(transitions_count, 0, sizeof(transitions_count));
 #ifdef DEBUG
             step_serial(day);
 #else
@@ -182,7 +214,7 @@ public:
 #endif
             auto stop = high_resolution_clock::now(); 
             auto duration = duration_cast<milliseconds>(stop - start); 
-            LOG(info) << "TIME TAKEN: " << duration.count() << "ms"; 
+            make_day_report(day, duration.count(), report);
         }
         ofstream fout(json_filename);
         fout << report;
