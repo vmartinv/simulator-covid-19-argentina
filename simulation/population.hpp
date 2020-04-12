@@ -92,7 +92,7 @@ public:
         report();
     }
 
-    void validate(){
+    void validate() const{
         LOG(info) << "Validating database...";
         assert(num_zones==nearests_zones.size());
         ProgressBar progressBar(people.size(), 70);
@@ -104,11 +104,11 @@ public:
         progressBar.done();
     }
 
-    inline Person &get(const int idx) {
+    inline const Person &get(const int idx) const {
         return people[idx];
     }
 
-    void report(){
+    void report() const {
         LOG(info) << "Number of people: " << people.size();
         LOG(info) << "Number of families: " << num_families;
         LOG(info) << "Number of zones: " << num_zones;

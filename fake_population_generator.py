@@ -28,7 +28,7 @@ class Person:
         self.sexo = sexo
         self.escuela = escuela
         self.trabajo = trabajo
-    
+
     def pack(self):
         struct_format = '>IIHB?II'
         return struct.pack(struct_format, self.id, self.family, self.zone, int(self.edad), self.sexo == 'Mujer', self.escuela, self.trabajo)
@@ -38,7 +38,7 @@ class Population:
         self.people = []
         self.nearest_zones = []
         self.geodata = None
-    
+
     def to_dat(self, dat_file, json_file, geopackage_file):
         with open(json_file, 'w') as fout:
             json.dump({
@@ -84,12 +84,12 @@ class AlumnSchoolIdGenerator:
         self.cur_capacity = -1
         self.cur_size = 0
         self.cur_idx = 0
-    
+
     def _gen_new_school(self):
         self.cur_capacity = self.mean
         self.cur_size = 0
         self.cur_idx = self.school_gen.get_school()
-    
+
     def get_school(self):
         if self.cur_size >= self.cur_capacity:
             self._gen_new_school()
@@ -102,7 +102,7 @@ def cross_cols(a, b):
 
 def nearests_zones(geodata, upper_bound=5000, max_nearests=1200):
     #https://www.eye4software.com/hydromagic/documentation/supported-map-grids/Argentina
-    geodata.to_crs(epsg=5349,inplace=True)
+    geodata = geodata.to_crs(epsg=5349)
     centroids = np.array(list(zip(geodata.geometry.centroid.x, geodata.geometry.centroid.y)) )
     btree = cKDTree(centroids)
     dist, idx = btree.query(centroids, k=max_nearests, distance_upper_bound=upper_bound)
@@ -131,7 +131,7 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schoo
             table = hdf.select(k)
             # validate_dpto_indexes(table['area'], geodata['dpto_id'])
             tables.append(table)
-    
+
     schooldb = pd.read_hdf(schooldb_file, 'matricula_y_secciones')
     schooldb = schooldb.replace(to_replace="Ciudad de Buenos Aires", value="Ciudad Autónoma de Buenos Aires")
     count_cols = list(filter(lambda s: s.startswith('Alumnos con Sobreedad') or s.startswith('Repitentes') or s.startswith('Matrícula.'), schooldb.columns))

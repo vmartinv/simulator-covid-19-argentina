@@ -34,13 +34,22 @@ def download_and_extract(url, save_zip, save_file=None, path=None):
 
 def store_indec():
     ensure_dir_exists(INDEC_DIR)
+    exts = ['.shp', '.shx', '.dbf']
+
+    ZIP_SOURCE = 'https://www.indec.gob.ar/ftp/cuadros/territorio/codgeo/Codgeo_Pais_x_loc_con_datos.zip'
+    ZIP_FILE = os.path.join(INDEC_DIR, 'pxlocdatos.zip')
+    BASE_FILE = 'Codgeo_Pais_x_loc_con_datos/pxlocdatos'
+    for ext in exts:
+        dst = os.path.join(INDEC_DIR, os.path.basename(BASE_FILE+ext))
+        if not os.path.exists(dst):
+            download_and_extract(ZIP_SOURCE, ZIP_FILE, BASE_FILE+ext, INDEC_DIR)
+            shutil.copyfile(os.path.join(INDEC_DIR, BASE_FILE+ext), dst)
+
     ZIP_SOURCE = 'https://sitioanterior.indec.gob.ar/ftp/cuadros/territorio/codgeo/Codgeo_Pais_x_dpto_con_datos.zip'
     ZIP_FILE = os.path.join(INDEC_DIR, 'pxdptodatosok.zip')
-
-    SHP_FILE = 'pxdptodatosok.shp'
-    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE, INDEC_DIR)
-    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.shx'), INDEC_DIR)
-    download_and_extract(ZIP_SOURCE, ZIP_FILE, SHP_FILE.replace('.shp', '.dbf'), INDEC_DIR)
+    BASE_FILE = 'pxdptodatosok'
+    for ext in exts:
+        download_and_extract(ZIP_SOURCE, ZIP_FILE, BASE_FILE+ext, INDEC_DIR)
 
 def store_densidad():
     ZIP_SOURCE = "https://github.com/datosgobar/densidad-poblacion/archive/master.zip"

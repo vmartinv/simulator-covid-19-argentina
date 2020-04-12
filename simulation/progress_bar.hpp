@@ -51,7 +51,8 @@ public:
     {
         ticks = total_ticks;
         display();
-        std::cout << std::endl;
+        if(show)
+            std::cout << std::endl;
     }
 };
 

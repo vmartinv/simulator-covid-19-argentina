@@ -58,7 +58,7 @@ struct EnvironmentState{
 
 class SeirState{
 public:
-    Population population;
+    const Population population;
     vector<PersonId> general[PERSON_STATE_COUNT][MAX_AGE+1];
     vector<EnvironmentState> environments[ENVIRONMENT_COUNT];
 

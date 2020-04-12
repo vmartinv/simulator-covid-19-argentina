@@ -40,16 +40,17 @@ class SeirSimulation{
         const vector<PersonId> lst;
         Delta(const PersonState src, const PersonState dst, const TransitionReason reason, const vector<PersonId> lst): src(src), dst(dst), reason(reason), lst(lst) {}
 
-        void apply(SeirState &state, int *transitions_count) const {
+        void apply(SeirState &state, vector<vector<unsigned>> &state_trans_by_zone) const {
             for(const PersonId id: lst){
                 if(state.get_estado_persona(id)==src){
                     state.change_state(id, dst);
-                    transitions_count[static_cast<int>(reason)]++;
+                    state_trans_by_zone.back()[static_cast<int>(reason)]++;
+                    state_trans_by_zone[state.population.people[id].zone][static_cast<int>(reason)]++;
                 }
             }
         }
     };
-    int transitions_count[TRANSITION_REASONS_COUNT];
+    vector<vector<unsigned>> state_trans_by_zone;
     SeirState state;
     const DiseaseParameters disease;
     mt19937 generator;
@@ -135,17 +136,34 @@ class SeirSimulation{
 
     void make_day_report(unsigned day, unsigned duration, json &report){
         LOG(info) << "Day " << day;
-        report["day"].push_back(day);
-        report["compute_time_ms"].push_back(duration);
+        report["general"]["day"].push_back(day);
+        report["general"]["compute_time_ms"].push_back(duration);
         for(auto st=0; st<PERSON_STATE_COUNT; st++){
             unsigned count = state.count_state(static_cast<PersonState>(st));
-            report[person_state_text[st]].push_back(count);
+            report["general"][person_state_text[st]].push_back(count);
             LOG(info) << person_state_text[st] << ": " << count;
         }
         for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
-            unsigned count = transitions_count[tr];
-            report[transition_reason_text[tr]].push_back(count);
+            unsigned count = state_trans_by_zone.back()[tr];
+            report["general"][transition_reason_text[tr]].push_back(count);
             LOG(info) << transition_reason_text[tr] << ": " << count;
+        }
+
+        vector<vector<int>> state_count_by_zone(state.population.num_zones, vector<int>(PERSON_STATE_COUNT));
+        for(const Person& p: state.population.people){
+            auto st = state.get_estado_persona(p.id);
+            state_count_by_zone[p.zone][static_cast<int>(st)]++;
+        }
+        for(unsigned zone=0; zone<state.population.num_zones; zone++){
+            report["by_zone"]["day"].push_back(day);
+            report["by_zone"]["zone"].push_back(zone);
+            for(auto st=0; st<PERSON_STATE_COUNT; st++){
+                report["by_zone"][person_state_text[st]].push_back(state_count_by_zone[zone][st]);
+            }
+            for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
+                unsigned count = state_trans_by_zone[zone][tr];
+                report["by_zone"][transition_reason_text[tr]].push_back(count);
+            }
         }
         auto alive_count = state.population.people.size()-state.count_state(DEAD);
         LOG(info) << "TOTAL ALIVE: " << alive_count;
@@ -163,7 +181,7 @@ class SeirSimulation{
             cases_evolution_step(age);
         }
         for(const Delta& d: deltas){
-            d.apply(state, transitions_count);
+            d.apply(state, state_trans_by_zone);
         }
     }
     void step_parallel(unsigned day){
@@ -181,18 +199,20 @@ class SeirSimulation{
             t.join();
         }
         for(const Delta& d: deltas){
-            d.apply(state, transitions_count);
+            d.apply(state, state_trans_by_zone);
         }
     }
     json create_empty_report(){
         json j;
-        j["day"] = vector<int>();
-        j["compute_time_ms"] = vector<int>();
-        for(int i=0; i<PERSON_STATE_COUNT; i++){
-            j[person_state_text[i]]=vector<int>();
-        }
-        for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
-            j[transition_reason_text[tr]]=vector<int>();
+        j["general"]["compute_time_ms"] = json::array();
+        for(const auto& context: {"by_zone","general"}){
+            j[context]["day"] = json::array();
+            for(int i=0; i<PERSON_STATE_COUNT; i++){
+                j[context][person_state_text[i]]=json::array();
+            }
+            for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
+                j[context][transition_reason_text[tr]]=json::array();
+            }
         }
         return j;
     }
@@ -206,7 +226,7 @@ public:
         LOG(info) << "Starting simulation...";
         for(unsigned day = 1; day<=days; day++){
             auto start = high_resolution_clock::now(); 
-            memset(transitions_count, 0, sizeof(transitions_count));
+            state_trans_by_zone = vector<vector<unsigned>>(state.population.num_zones+1, vector<unsigned>(TRANSITION_REASONS_COUNT));
 #ifdef DEBUG
             step_serial(day);
 #else
