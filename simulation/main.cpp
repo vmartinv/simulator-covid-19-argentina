@@ -1,12 +1,17 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
 #include "common.hpp"
+#include "progress_bar.hpp"
 #include "population.hpp"
 #include "disease_parameters.hpp"
 #include "seir_simulation.hpp"
 using namespace std;
 namespace fs = boost::filesystem;
 using namespace boost::program_options;
+namespace logging = boost::log;
 
 const fs::path DATA_DIR = fs::path("..") / fs::path("data") / fs::path("argentina");
 #ifdef DEBUG
@@ -22,6 +27,7 @@ int main(int argc, const char *argv[]){
         options_description desc{"Options"};
         desc.add_options()
         ("help,h", "Help screen")
+        ("silent", "Silent mode")
         ("seed,s", value<int>()->default_value(0), "Seed used by the simulation (0 means random seed)")
         ("days,d", value<unsigned>()->default_value(30), "Numbers of days to simulate")
         ("population,p", value<string>()->default_value(FAKE_DB_FILE.string()), "Basename of the fake population database (created by fake_population_generator.py)")
@@ -38,6 +44,13 @@ int main(int argc, const char *argv[]){
     catch (const error &ex)
     {
         cerr << ex.what() << '\n';
+    }
+    if(vm.count("silent")){
+        logging::core::get()->set_filter
+        (
+            logging::trivial::severity >= logging::trivial::error
+        );
+        ProgressBar::show = false;
     }
 #ifdef DEBUG
     LOG(info) << "Compiled in Debug mode";

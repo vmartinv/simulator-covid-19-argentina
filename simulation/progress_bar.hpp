@@ -16,6 +16,7 @@ private:
     const unsigned int step;
 
     inline void display() {
+        if(!show) return;
         float progress = (float) ticks / total_ticks;
         unsigned pos = (int) (bar_width * progress);
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -33,6 +34,7 @@ private:
         std::cout.flush();
     }
 public:
+    static bool show;
     ProgressBar(unsigned int total, unsigned int width, char complete, char incomplete) :
             total_ticks {total}, bar_width {width}, complete_char {complete}, incomplete_char {incomplete}, step {total/width} {}
 
