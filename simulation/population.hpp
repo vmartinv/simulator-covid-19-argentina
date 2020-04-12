@@ -1,10 +1,12 @@
 #ifndef POPULATION_HPP
 #define POPULATION_HPP
 #include <boost/range/adaptor/reversed.hpp>
+#include <nlohmann/json.hpp>
 #include "common.hpp"
 #include "endian.hpp"
 #include "progress_bar.hpp"
 using namespace std;
+using json = nlohmann::json;
 
 
 struct Person{
@@ -52,18 +54,28 @@ istream& operator>> (istream& is, Person& p)
 
 const int MAX_AGE = 110;
 typedef unsigned PersonId;
+typedef unsigned ZoneId;
 
 class Population{
+private:
+    void load_json(const string &json_filename){    
+        LOG(info) << "Loading database " << json_filename << "...";
+        ifstream file(json_filename);
+        json j;
+        file >> j;
+        nearests_zones = vector<vector<ZoneId>>(j["nearest_zones"]);
+    }
 public:
     vector<Person> people;
+    vector<vector<ZoneId>> nearests_zones;
     unsigned num_families = 0;
     unsigned num_zones = 0;
     unsigned num_schools = 0;
     unsigned char max_age = 0;
     static const unsigned NO_SCHOOL = 0;
     Population() {}
-    Population(const string &pop_filename){
-        LOG(info) << "Loading database " << pop_filename << "...";    
+    Population(const string &pop_filename, const string &json_filename){
+        LOG(info) << "Loading database " << pop_filename << "...";
         ifstream file(pop_filename, ios::binary);
         std::copy(std::istream_iterator<Person>(file),
             std::istream_iterator<Person>(),
@@ -75,12 +87,14 @@ public:
         [] (Person const& s1, Person const& s2) { return s1.escuela < s2.escuela; })->escuela+1;
         max_age = max_element(begin(people), end(people),
         [] (Person const& s1, Person const& s2) { return s1.edad < s2.edad; })->edad;
+        load_json(json_filename);
         validate();
         report();
     }
 
     void validate(){
         LOG(info) << "Validating database...";
+        assert(num_zones==nearests_zones.size());
         ProgressBar progressBar(people.size(), 70);
         for(const auto &p : people){
             assert(0 <= p.id && p.id < people.size());
@@ -96,6 +110,9 @@ public:
 
     void report(){
         LOG(info) << "Number of people: " << people.size();
+        LOG(info) << "Number of families: " << num_families;
+        LOG(info) << "Number of zones: " << num_zones;
+        LOG(info) << "Number of schools: " << num_schools;
         LOG(info) << "Random person: " << people[rand() % people.size()];
     }
 };

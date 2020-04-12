@@ -111,6 +111,10 @@ public:
         }
         return count;
     }
+
+    const PersonState &get_estado_persona(const PersonId& id) const{
+        return estado_persona[id].state;
+    }
 private:
 
 

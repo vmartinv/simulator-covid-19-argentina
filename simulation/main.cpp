@@ -8,8 +8,10 @@ namespace fs = boost::filesystem;
 const fs::path DATA_DIR = fs::path("..") / fs::path("data") / fs::path("argentina");
 #ifdef DEBUG
 const fs::path FAKE_DB_FILE = DATA_DIR / fs::path("fake_population_small.dat");
+const fs::path FAKE_DB_JSON_FILE = DATA_DIR / fs::path("fake_population_small.json");
 #else
 const fs::path FAKE_DB_FILE = DATA_DIR / fs::path("fake_population.dat");
+const fs::path FAKE_DB_JSON_FILE = DATA_DIR / fs::path("fake_population.json");
 #endif
 
 int main(){
@@ -18,7 +20,7 @@ int main(){
 #else
     LOG(info) << "Running in Release mode";
 #endif
-    SeirSimulation simulation(Population(FAKE_DB_FILE.string()), 23415);
-    simulation.run();
+    SeirSimulation simulation(Population(FAKE_DB_FILE.string(), FAKE_DB_JSON_FILE.string()), 23415);
+    simulation.run(30);
     return 0;
 }

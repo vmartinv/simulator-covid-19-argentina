@@ -42,7 +42,7 @@ class SeirSimulation{
             return vector<PersonId>();
         }
         vector<PersonId> delta;
-        binomial_distribution<int> distribution(group.size(), prob);
+        binomial_distribution<int> distribution(group.size(), min(1., prob));
         sample(begin(group), end(group), back_inserter(delta), distribution(generator), generator);
         return delta;
     }
@@ -63,13 +63,15 @@ class SeirSimulation{
 
         void apply(SeirState &state) const {
             for(const PersonId id: lst){
-                state.change_state(id, dst);
+                if(state.get_estado_persona(id)==src){
+                    state.change_state(id, dst);
+                }
             }
         }
     };
 
     void introduce_new_cases_step(int day){
-        if(day<=10){
+        if(day<=16){
             int new_cases = ceil(initial_new_cases * pow(new_cases_rate, day));
 
             const int initial_age=25;
@@ -93,6 +95,16 @@ class SeirSimulation{
     void neighbourhood_contact_step(){
         for(const auto& env_st: state.environments[NEIGHBOURHOOD]){
             add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.0001*env_st.num[INFECTED_1])));
+        }
+    }
+    void inter_neighbourhood_contact_step(){
+        for(unsigned i=0; i<state.population.num_zones; i++){
+            auto &env_st = state.environments[NEIGHBOURHOOD][i];
+            for(const auto j: state.population.nearests_zones[i]){
+                auto &env_st2 = state.environments[NEIGHBOURHOOD][j];
+                assert(i!=j);
+                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, pick_with_probability(env_st.susceptibles, 0.0001*env_st2.num[INFECTED_1])));
+            }
         }
     }
 
@@ -131,6 +143,7 @@ class SeirSimulation{
         home_contact_step();
         school_contact_step();
         neighbourhood_contact_step();
+        inter_neighbourhood_contact_step();
         for(int age=0; age<=MAX_AGE; age++){
             cases_evolution_step(age);
         }
@@ -145,6 +158,7 @@ class SeirSimulation{
         steps.push_back(thread(&SeirSimulation::home_contact_step, this));
         steps.push_back(thread(&SeirSimulation::school_contact_step, this));
         steps.push_back(thread(&SeirSimulation::neighbourhood_contact_step, this));
+        steps.push_back(thread(&SeirSimulation::inter_neighbourhood_contact_step, this));
         for(int age=0; age<=MAX_AGE; age++){
             steps.push_back(thread(&SeirSimulation::cases_evolution_step, this, age));
         }
@@ -171,7 +185,7 @@ public:
 #ifdef DEBUG
             step_serial(day);
 #else
-            step_parallel(day);
+            step_serial(day); //TODO: fix parallel (create generator per thread)
 #endif
             auto stop = high_resolution_clock::now(); 
             auto duration = duration_cast<milliseconds>(stop - start); 
