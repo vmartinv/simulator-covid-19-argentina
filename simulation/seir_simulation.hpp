@@ -114,6 +114,7 @@ class SeirSimulation{
 
     void make_day_report(unsigned day, json &report){
         LOG(info) << "Day " << day;
+        report["day"].push_back(day);
         for(auto st=0; st<PERSON_STATE_COUNT; st++){
             unsigned count = state.count_state(static_cast<PersonState>(st));
             report[person_state_text[st]].push_back(count);
@@ -157,6 +158,7 @@ class SeirSimulation{
     }
     json create_empty_report(){
         json j;
+        j["day"] = vector<int>();
         for(int i=0; i<PERSON_STATE_COUNT; i++){
             j[person_state_text[i]]=vector<int>();
         }
