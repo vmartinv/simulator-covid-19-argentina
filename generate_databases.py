@@ -54,16 +54,16 @@ def store_densidad():
         shutil.rmtree(os.path.join(DEST_DIR, 'densidad-poblacion-master'))
 
 def store_fake_population():
-    POP_SMALL_FILE = os.path.join(DATA_DIR, 'fake_population_small.dat')
-    POP_SMALL_FILE_JSON = POP_SMALL_FILE.replace('.dat', '.json')
-    if not os.path.exists(POP_SMALL_FILE) or not os.path.exists(POP_SMALL_FILE_JSON):
-        print(f"Generating small fake population to {POP_SMALL_FILE}...")
-        fake_population_generator.generate(frac=0.01).to_dat(POP_SMALL_FILE, POP_SMALL_FILE_JSON)
-    POP_FILE = os.path.join(DATA_DIR, 'fake_population.dat')
-    POP_FILE_JSON = POP_FILE.replace('.dat', '.json')
-    if not os.path.exists(POP_FILE) or not os.path.exists(POP_FILE_JSON):
-        print(f"Generating fake population to {POP_FILE}...")
-        fake_population_generator.generate().to_dat(POP_FILE, POP_FILE_JSON)
+    POPULATIONS = [
+        ('fake_population_small', 0.01),
+        ('fake_population', 1.0),
+    ]
+    for name, frac in POPULATIONS:
+        basefile = os.path.join(DATA_DIR, name)
+        output_files = [basefile+ext for ext in ['.dat', '.json', '.gpkg']]
+        if any(not os.path.exists(f) for f in output_files):
+            print(f"Generating {basefile}...")
+            fake_population_generator.generate(frac=frac).to_dat(*output_files)
 
 def store_schools():
     EDUCACION_DIR = os.path.join(DATA_DIR, "ministerio-educacion")

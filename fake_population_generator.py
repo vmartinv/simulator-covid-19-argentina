@@ -37,12 +37,14 @@ class Population:
     def __init__(self):
         self.people = []
         self.nearest_zones = []
+        self.geodata = None
     
-    def to_dat(self, dat_file, json_file):
+    def to_dat(self, dat_file, json_file, geopackage_file):
         with open(json_file, 'w') as fout:
             json.dump({
                 'nearest_zones': self.nearest_zones,
             }, fout)
+        self.geodata.to_file(geopackage_file, driver="GPKG")
         with open(dat_file, mode='wb') as fout:
             for p in tqdm(self.people):
                 fout.write(p.pack())
@@ -174,6 +176,8 @@ def generate(genpop_dataset = None, frac=1.):
     escuelas = {}
     trabajos = {}
     geodata = geodata.sample(frac=frac)
+    population.geodata = geodata
+
     print("Calculating nearests zones...")
     population.nearest_zones = nearests_zones(geodata, 5000, 1200)
 
@@ -245,7 +249,7 @@ def generate(genpop_dataset = None, frac=1.):
 
 
 def main():
-    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'))
+    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'), os.path.join(DATA_DIR, 'fake_population_small.gpkg'))
 
 if __name__ == "__main__":
     main()
