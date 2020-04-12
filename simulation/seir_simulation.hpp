@@ -5,10 +5,13 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include "progress_bar.hpp"
 #include "seir_state.hpp"
 using namespace std;
-using namespace std::chrono; 
+using namespace std::chrono;
+using json = nlohmann::json;
 
 class SeirSimulation{
 
@@ -25,7 +28,7 @@ class SeirSimulation{
             }
         }
     };
-    
+
     SeirState state;
     const DiseaseParameters disease;
     mt19937 generator;
@@ -109,16 +112,18 @@ class SeirSimulation{
         add_delta_safe(Delta(INFECTED_3, DEAD, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_death_from_critical)));
     }
 
-    void report(int day){
+    void make_day_report(unsigned day, json &report){
         LOG(info) << "Day " << day;
         for(auto st=0; st<PERSON_STATE_COUNT; st++){
-            LOG(info) << person_state_text[st] << ": " << state.count_state(static_cast<PersonState>(st));
+            unsigned count = state.count_state(static_cast<PersonState>(st));
+            report[person_state_text[st]].push_back(count);
+            LOG(info) << person_state_text[st] << ": " << count;
         }
         auto alive_count = state.population.people.size()-state.count_state(DEAD);
         LOG(info) << "TOTAL ALIVE: " << alive_count;
     }
 
-    void step_serial(int day){
+    void step_serial(unsigned day){
         deltas.clear();
         introduce_new_cases_step(day);
         home_contact_step();
@@ -132,7 +137,7 @@ class SeirSimulation{
             d.apply(state);
         }
     }
-    void step_parallel(int day){
+    void step_parallel(unsigned day){
         deltas.clear();
         vector<thread> steps;
         steps.push_back(thread(&SeirSimulation::introduce_new_cases_step, this, day));
@@ -150,16 +155,24 @@ class SeirSimulation{
             d.apply(state);
         }
     }
+    json create_empty_report(){
+        json j;
+        for(int i=0; i<PERSON_STATE_COUNT; i++){
+            j[person_state_text[i]]=vector<int>();
+        }
+        return j;
+    }
 
 public:
-    SeirSimulation(Population population, const DiseaseParameters &disease, const unsigned int seed=random_device{}()): state(population), disease(disease), generator(seed) {}
+    SeirSimulation(Population population, const DiseaseParameters &disease, const unsigned int seed=0): state(population), disease(disease), generator(seed? seed : random_device{}()) {}
 
-    void run(int days=numeric_limits<int>::max()){
+    void run(unsigned days, const string &json_filename){
         state.reset();
+        json report = create_empty_report();
         LOG(info) << "Starting simulation...";
-        for(int day = 1; day<=days; day++){
+        for(unsigned day = 1; day<=days; day++){
             auto start = high_resolution_clock::now(); 
-            report(day);
+            make_day_report(day, report);
 #ifdef DEBUG
             step_serial(day);
 #else
@@ -168,7 +181,9 @@ public:
             auto stop = high_resolution_clock::now(); 
             auto duration = duration_cast<milliseconds>(stop - start); 
             LOG(info) << "TIME TAKEN: " << duration.count() << "ms"; 
-        }  
+        }
+        ofstream fout(json_filename);
+        fout << report;
     }
 };
 #endif

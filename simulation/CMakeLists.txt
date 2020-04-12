@@ -8,7 +8,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 add_definitions(-DBOOST_LOG_DYN_LINK)
-find_package(Boost 1.67.0 COMPONENTS log_setup log date_time system thread regex chrono filesystem) 
+find_package(Boost 1.67.0 COMPONENTS log_setup log date_time system thread regex chrono filesystem program_options) 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS}) 
