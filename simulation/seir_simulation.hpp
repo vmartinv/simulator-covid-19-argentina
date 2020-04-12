@@ -89,17 +89,17 @@ class SeirSimulation{
     }
     void home_contact_step(){
         for(const auto& env_st: state.environments[HOME]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, HOME_CONTACT, pick_with_probability(env_st.susceptibles, 0.01*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, HOME_CONTACT, pick_with_probability(env_st.susceptibles, 0.1*env_st.num[INFECTED_1])));
         }
     }
     void school_contact_step(){
         for(const auto& env_st: state.environments[SCHOOL]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, SCHOOL_CONTACT, pick_with_probability(env_st.susceptibles, 0.001*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, SCHOOL_CONTACT, pick_with_probability(env_st.susceptibles, 0.01*env_st.num[INFECTED_1])));
         }
     }
     void neighbourhood_contact_step(){
         for(const auto& env_st: state.environments[NEIGHBOURHOOD]){
-            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.0001*env_st.num[INFECTED_1])));
+            add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.001*env_st.num[INFECTED_1])));
         }
     }
     void inter_neighbourhood_contact_step(){
@@ -108,7 +108,7 @@ class SeirSimulation{
             for(const auto j: state.population.nearests_zones[i]){
                 auto &env_st2 = state.environments[NEIGHBOURHOOD][j];
                 assert(i!=j);
-                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, INTER_NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.0001*env_st2.num[INFECTED_1])));
+                add_delta_safe(Delta(SUSCEPTIBLE, EXPOSED, INTER_NEIGHBOURHOOD_CONTACT, pick_with_probability(env_st.susceptibles, 0.00001*env_st2.num[INFECTED_1])));
             }
         }
     }
