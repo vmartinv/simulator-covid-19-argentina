@@ -8,12 +8,11 @@ import shutil
 import convert_school_db
 
 DATA_DIR = os.path.join('data', 'argentina')
-INDEC_DIR = os.path.join(DATA_DIR, 'indec')
 
 def ensure_dir_exists(dir):
     if not os.path.exists(dir):
         os.makedirs(dir)
-    
+
 def download_url(url, save_path, chunk_size=128):
     if not os.path.exists(save_path):
         print(f'Downloading {save_path}...')
@@ -33,6 +32,7 @@ def download_and_extract(url, save_zip, save_file=None, path=None):
                 zip_ref.extractall(path)
 
 def store_indec():
+    INDEC_DIR = os.path.join(DATA_DIR, 'indec')
     ensure_dir_exists(INDEC_DIR)
     exts = ['.shp', '.shx', '.dbf']
 
@@ -95,13 +95,24 @@ def store_schools():
             download_url(url, xls)
             print(f'Generating {hdf}...')
             convert_school_db.convert_xlsx_to_hdf(xls, hdf)
+all_dif_or_eq = (a,b,c) => (a==b && b==c) || (a!=b && b!=c && a!=c)
+is_set = (a,b,c) => all_dif_or_eq(a[0], b[0], c[0]) && all_dif_or_eq(a[1], b[1], c[1]) && all_dif_or_eq(a[2], b[2], c[2]);
+cards = $x("//img[@class='card_sign']").map(x=>x.src.replace('https://smart-games.org/images/', '').replace('.png', '').split('_'));
+for (const [i, ei] of cards.entries()) {for (const [j, ej] of cards.entries()) {for (const [k, ek] of cards.entries()) {if(i<j && j<k){if(is_set(ei, ej, ek)){console.log(i, j, k);}}}}}
 
+def store_transporte():
+    TRANSPORTE_DIR = os.path.join(DATA_DIR, 'transporte')
+    ensure_dir_exists(TRANSPORTE_DIR)
+    URL = "https://ide.transporte.gob.ar/geoserver/observ/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=observ:_3.4.1.4.1.tmda_17_18_view&maxFeatures=1550&outputFormat=application%2Fjson"
+    dst = os.path.join(TRANSPORTE_DIR, "tdma2017.geojson")
+    download_url(URL, dst)
 
 def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
     store_densidad()
     store_schools()
+    store_transporte()
     store_fake_population()
 
 if __name__ == "__main__":

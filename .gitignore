@@ -144,3 +144,4 @@ static
 *.DS_Store
 data/argentina/fake_population.hdf
 .vscode
+google_maps_key.txt
