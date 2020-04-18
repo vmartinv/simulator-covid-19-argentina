@@ -7,12 +7,14 @@ An under construction [SEIR simulation](https://en.wikipedia.org/wiki/Compartmen
 - *[Google Slides](https://docs.google.com/presentation/d/1cNZLiriVJxIJajvodh8ViYtx37NB8REJ2n5osU5jKA0/edit?usp=sharing)* for a short description of the project (Spanish).
 
 ## Requirements
-Use with `conda` and `pip`:
+Install [miniconda](https://docs.conda.io/en/latest/miniconda.html) and run:
 
-    conda env create -f conda_environment.yml
-    pip install -r requirements.txt
+    conda env create -f conda_environment.yml -n covid-ar python=3
+    conda activate covid-ar
+    export PATH=${CONDA_PREFIX}/bin:$PATH
+    ./generate_databases.py
 
 ## Usage
-See different notebooks experiments with jupyter:
+See different notebooks experiments (`.ipynb` files) with [jupyter](https://jupyter.org):
 
         jupyter notebook
