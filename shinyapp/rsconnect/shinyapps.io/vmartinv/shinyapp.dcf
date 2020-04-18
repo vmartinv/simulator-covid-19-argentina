@@ -1,0 +1,10 @@
+name: shinyapp
+title:
+username:
+account: vmartinv
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2142668
+bundleId: 3032419
+url: https://vmartinv.shinyapps.io/shinyapp/
+when: 1587247850.62904
