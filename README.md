@@ -1,6 +1,6 @@
 # COVID-19 Simulation in Argentina population
 
-An under construction [SEIR simulation](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) using census, education and transport databases of Argentina. The databases are obtained from public and govemerment sources.
+An under construction [SEIR simulation](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology) using census, education and transport databases of Argentina. The databases are obtained from public and government sources.
 
 ## Description of the model
 - *[docs/model_specification.pdf](https://github.com/vmartinv/simulator-covid-19-argentina/raw/master/docs/model_specification.pdf)* for a mathematical description of the model (Spanish).
