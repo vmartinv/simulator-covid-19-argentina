@@ -58,9 +58,10 @@ typedef unsigned ZoneId;
 
 class Population{
 private:
-    void load_json(const string &json_filename){    
+    void load_json(const string &json_filename){
         LOG(info) << "Loading database " << json_filename << "...";
         ifstream file(json_filename);
+        fail_if(file.fail(), json_filename + " not found!");
         json j;
         file >> j;
         nearests_zones = vector<vector<ZoneId>>(j["nearest_zones"]);
@@ -77,6 +78,7 @@ public:
     Population(const string &pop_filename, const string &json_filename){
         LOG(info) << "Loading database " << pop_filename << "...";
         ifstream file(pop_filename, ios::binary);
+        fail_if(file.fail(), pop_filename + " not found!");
         std::copy(std::istream_iterator<Person>(file),
             std::istream_iterator<Person>(),
             std::back_inserter(people));
@@ -94,11 +96,11 @@ public:
 
     void validate() const{
         LOG(info) << "Validating database...";
-        assert(num_zones==nearests_zones.size());
+        fail_if(num_zones!=nearests_zones.size(), "Not all zones have neighbourhood list");
         ProgressBar progressBar(people.size(), 70);
         for(const auto &p : people){
-            assert(0 <= p.id && p.id < people.size());
-            assert(0 <= p.family && p.family < num_families);
+            fail_if(!(0 <= p.id && p.id < people.size()), "Person numeration not in [0..n-1] range");
+            fail_if(!(0 <= p.family && p.family < num_families), "Family numeration not in [0..n-1] range");
             ++progressBar;
         }
         progressBar.done();

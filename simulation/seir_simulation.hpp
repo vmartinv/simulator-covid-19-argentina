@@ -3,7 +3,6 @@
 #include <random>
 #include <algorithm>
 #include <vector>
-#include <thread>
 #include <chrono>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -55,7 +54,6 @@ class SeirSimulation{
     const DiseaseParameters disease;
     mt19937 generator;
     vector<Delta> deltas;
-    mutex deltas_mutex;
 
     vector<PersonId> pick_with_probability(const vector<PersonId> &group, const double prob){
         if(prob<1e-9){
@@ -116,14 +114,13 @@ class SeirSimulation{
 
     void add_delta_safe(const Delta& delta){
         if(!delta.lst.empty()){
-            lock_guard<mutex> lk(deltas_mutex);
             deltas.push_back(delta);
         }
     }
 
     void cases_evolution_step(int age){
         add_delta_safe(Delta(EXPOSED, INFECTED_1, UNDEFINED, pick_with_probability(state.general[EXPOSED][age], disease.fraction_become_mild)));
-        
+
         add_delta_safe(Delta(INFECTED_1, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_recover_from_mild)));
         add_delta_safe(Delta(INFECTED_1, INFECTED_2, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_severe_from_mild)));
 
@@ -167,7 +164,7 @@ class SeirSimulation{
         }
         auto alive_count = state.population.people.size()-state.count_state(DEAD);
         LOG(info) << "TOTAL ALIVE: " << alive_count;
-        LOG(info) << "TIME TAKEN: " << duration << "ms"; 
+        LOG(info) << "TIME TAKEN: " << duration << "ms";
     }
 
     void step_serial(unsigned day){
@@ -179,24 +176,6 @@ class SeirSimulation{
         inter_neighbourhood_contact_step();
         for(int age=0; age<=MAX_AGE; age++){
             cases_evolution_step(age);
-        }
-        for(const Delta& d: deltas){
-            d.apply(state, state_trans_by_zone);
-        }
-    }
-    void step_parallel(unsigned day){
-        deltas.clear();
-        vector<thread> steps;
-        steps.push_back(thread(&SeirSimulation::introduce_new_cases_step, this, day));
-        steps.push_back(thread(&SeirSimulation::home_contact_step, this));
-        steps.push_back(thread(&SeirSimulation::school_contact_step, this));
-        steps.push_back(thread(&SeirSimulation::neighbourhood_contact_step, this));
-        steps.push_back(thread(&SeirSimulation::inter_neighbourhood_contact_step, this));
-        for(int age=0; age<=MAX_AGE; age++){
-            steps.push_back(thread(&SeirSimulation::cases_evolution_step, this, age));
-        }
-        for (auto& t: steps){
-            t.join();
         }
         for(const Delta& d: deltas){
             d.apply(state, state_trans_by_zone);
@@ -225,15 +204,15 @@ public:
         json report = create_empty_report();
         LOG(info) << "Starting simulation...";
         for(unsigned day = 1; day<=days; day++){
-            auto start = high_resolution_clock::now(); 
+            auto start = high_resolution_clock::now();
             state_trans_by_zone = vector<vector<unsigned>>(state.population.num_zones+1, vector<unsigned>(TRANSITION_REASONS_COUNT));
 #ifdef DEBUG
             step_serial(day);
 #else
             step_serial(day); //TODO: fix parallel (create generator per thread)
 #endif
-            auto stop = high_resolution_clock::now(); 
-            auto duration = duration_cast<milliseconds>(stop - start); 
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(stop - start);
             make_day_report(day, duration.count(), report);
         }
         ofstream fout(json_filename);

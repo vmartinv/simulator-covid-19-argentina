@@ -5,8 +5,16 @@
 
 #define LOG(severity) BOOST_LOG_TRIVIAL(severity)
 #define dprint(var) LOG(info) << #var << " = " << var
-#endif
 
 #ifndef NDEBUG
 #define DEBUG
+#endif
+
+void fail_if(const bool condition, const std::string &message){
+    if(condition){
+        LOG(error) << message;
+        exit(1);
+    }
+}
+
 #endif
