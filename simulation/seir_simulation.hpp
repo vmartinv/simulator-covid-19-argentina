@@ -55,6 +55,12 @@ class SeirSimulation{
     mt19937 generator;
     vector<Delta> deltas;
 
+    void add_delta_safe(const Delta& delta){
+        if(!delta.lst.empty()){
+            deltas.push_back(delta);
+        }
+    }
+
     vector<PersonId> pick_with_probability(const vector<PersonId> &group, const double prob){
         if(prob<1e-9){
             return vector<PersonId>();
@@ -112,23 +118,47 @@ class SeirSimulation{
         }
     }
 
-    void add_delta_safe(const Delta& delta){
-        if(!delta.lst.empty()){
-            deltas.push_back(delta);
+    void cases_evolution_step(){
+        for(int age=0; age<=MAX_AGE; age++){
+            add_delta_safe(Delta(EXPOSED, INFECTED_1, UNDEFINED, pick_with_probability(state.general[EXPOSED][age], disease.fraction_become_mild)));
+
+            add_delta_safe(Delta(INFECTED_1, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_recover_from_mild)));
+            add_delta_safe(Delta(INFECTED_1, INFECTED_2, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_severe_from_mild)));
+
+            add_delta_safe(Delta(INFECTED_2, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_recover_from_severe)));
+            add_delta_safe(Delta(INFECTED_2, INFECTED_3, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_critical_from_severe)));
+
+            add_delta_safe(Delta(INFECTED_3, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_recover_from_critical)));
+            add_delta_safe(Delta(INFECTED_3, DEAD, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_death_from_critical)));
         }
     }
 
-    void cases_evolution_step(int age){
-        add_delta_safe(Delta(EXPOSED, INFECTED_1, UNDEFINED, pick_with_probability(state.general[EXPOSED][age], disease.fraction_become_mild)));
+    void run_steps(unsigned day){
+        deltas.clear();
+        introduce_new_cases_step(day);
+        home_contact_step();
+        school_contact_step();
+        neighbourhood_contact_step();
+        inter_neighbourhood_contact_step();
+        cases_evolution_step();
+        for(const Delta& d: deltas){
+            d.apply(state, state_trans_by_zone);
+        }
+    }
 
-        add_delta_safe(Delta(INFECTED_1, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_recover_from_mild)));
-        add_delta_safe(Delta(INFECTED_1, INFECTED_2, UNDEFINED, pick_with_probability(state.general[INFECTED_1][age], disease.fraction_severe_from_mild)));
-
-        add_delta_safe(Delta(INFECTED_2, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_recover_from_severe)));
-        add_delta_safe(Delta(INFECTED_2, INFECTED_3, UNDEFINED, pick_with_probability(state.general[INFECTED_2][age], disease.fraction_critical_from_severe)));
-
-        add_delta_safe(Delta(INFECTED_3, RECOVERED, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_recover_from_critical)));
-        add_delta_safe(Delta(INFECTED_3, DEAD, UNDEFINED, pick_with_probability(state.general[INFECTED_3][age], disease.fraction_death_from_critical)));
+    json create_empty_report(){
+        json j;
+        j["general"]["compute_time_ms"] = json::array();
+        for(const auto& context: {"by_zone","general"}){
+            j[context]["day"] = json::array();
+            for(int i=0; i<PERSON_STATE_COUNT; i++){
+                j[context][person_state_text[i]]=json::array();
+            }
+            for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
+                j[context][transition_reason_text[tr]]=json::array();
+            }
+        }
+        return j;
     }
 
     void make_day_report(unsigned day, unsigned duration, json &report){
@@ -167,35 +197,6 @@ class SeirSimulation{
         LOG(info) << "TIME TAKEN: " << duration << "ms";
     }
 
-    void step_serial(unsigned day){
-        deltas.clear();
-        introduce_new_cases_step(day);
-        home_contact_step();
-        school_contact_step();
-        neighbourhood_contact_step();
-        inter_neighbourhood_contact_step();
-        for(int age=0; age<=MAX_AGE; age++){
-            cases_evolution_step(age);
-        }
-        for(const Delta& d: deltas){
-            d.apply(state, state_trans_by_zone);
-        }
-    }
-    json create_empty_report(){
-        json j;
-        j["general"]["compute_time_ms"] = json::array();
-        for(const auto& context: {"by_zone","general"}){
-            j[context]["day"] = json::array();
-            for(int i=0; i<PERSON_STATE_COUNT; i++){
-                j[context][person_state_text[i]]=json::array();
-            }
-            for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
-                j[context][transition_reason_text[tr]]=json::array();
-            }
-        }
-        return j;
-    }
-
 public:
     SeirSimulation(Population population, const DiseaseParameters &disease, const unsigned int seed=0): state(population), disease(disease), generator(seed? seed : random_device{}()) {}
 
@@ -206,17 +207,13 @@ public:
         for(unsigned day = 1; day<=days; day++){
             auto start = high_resolution_clock::now();
             state_trans_by_zone = vector<vector<unsigned>>(state.population.num_zones+1, vector<unsigned>(TRANSITION_REASONS_COUNT));
-#ifdef DEBUG
-            step_serial(day);
-#else
-            step_serial(day); //TODO: fix parallel (create generator per thread)
-#endif
-            auto stop = high_resolution_clock::now();
-            auto duration = duration_cast<milliseconds>(stop - start);
+            //TODO: add parallel (create generator per thread)
+            run_steps(day);
+            auto end = high_resolution_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
             make_day_report(day, duration.count(), report);
         }
-        ofstream fout(json_filename);
-        fout << report;
+        ofstream(json_filename) << report;
     }
 };
 #endif
