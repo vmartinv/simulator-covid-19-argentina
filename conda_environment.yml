@@ -171,5 +171,6 @@ dependencies:
     - tables==3.6.1
     - tqdm==4.45.0
     - urllib3==1.25.9
+    - xlrd==1.2.0
 prefix: /Users/vmartinv/miniconda3/envs/covid-ar
 
