@@ -19,7 +19,7 @@ public:
         defaults["duration_hospitalization"] = 11;
         defaults["initial_new_cases"] = 10;
         defaults["new_cases_rate"] = pow(2, 1/5.);
-        defaults["home_contact_probability"] = 0.01;
+        defaults["home_contact_probability"] = 0.1;
         defaults["school_contact_probability"] = defaults["home_contact_probability"]/100;
         defaults["neighbourhood_contact_probability"] = defaults["home_contact_probability"]/1000;
         defaults["inter_province_contact_probability"] = defaults["home_contact_probability"]/10000000;

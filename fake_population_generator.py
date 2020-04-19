@@ -130,14 +130,18 @@ class AlumnSchoolIdGenerator:
 def cross_cols(a, b):
     return {c: [f'{c}.{c2}' for c2 in b] for c in a}
 
-def nearests_zones(geodata, upper_bound=5000, max_nearests=1200):
+def nearests_zones(geodata, upper_bound=5000, max_nearests=1200, remove_self=True):
     #https://www.eye4software.com/hydromagic/documentation/supported-map-grids/Argentina
     geodata = geodata.to_crs(epsg=5349)
     centroids = np.array(list(zip(geodata.geometry.centroid.x, geodata.geometry.centroid.y)) )
     btree = cKDTree(centroids)
     dist, idx = btree.query(centroids, k=max_nearests, distance_upper_bound=upper_bound)
     idxs = np.stack([dist, idx], axis=2)
-    nearests = [[int(id) for d,id in plist if d>1e-9 and d<max_nearests] for plist in idxs]
+    if remove_self:
+        condition = lambda d: d>1e-9 and d<max_nearests
+    else:
+        condition = lambda d: d<max_nearests
+    nearests = [[int(id) for d,id in plist if condition(d)] for plist in idxs]
     return nearests
 
 def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schooldb_file = SCHOOL_HDF):
@@ -178,7 +182,7 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schoo
 
     return geodata, functools.reduce(lambda a,b: pd.merge(a, b, how='inner', on='area'), tables)
 
-def generate(genpop_dataset = None, frac=1.):
+def generate(genpop_dataset = None, prov_id = None, frac=1.):
     if genpop_dataset is None:
         genpop_dataset = load_population_census()
     geodata, census = genpop_dataset
@@ -205,12 +209,16 @@ def generate(genpop_dataset = None, frac=1.):
     sexos = {}
     escuelas = {}
     trabajos = {}
+    if prov_id != None:
+        geodata = geodata[geodata['prov_id'].astype(int)==prov_id]
     geodata = geodata.sample(frac=frac)
     geodata.sort_values(['prov_id', 'dpto_id'], inplace=True)
     population.geodata = geodata
 
     print("Calculating nearests zones...")
-    population.nearest_zones = nearests_zones(geodata, 5000, 1200)
+    population.nearest_zones = nearests_zones(geodata, 1000, 1200, remove_self=False)
+    school_zones = nearests_zones(geodata, 5000, 1200, remove_self=False)
+
 
     print("Generating distributions by deparment...")
     for index, row in tqdm(census.iterrows(), total=len(census)):
@@ -224,13 +232,16 @@ def generate(genpop_dataset = None, frac=1.):
         trabajos[row['area']] = {k: GenWithDistribution(v, row) for k, v in edad_cross_trabaja.items()}
 
     print("Generating population...")
-    es_flia_urbana = []
     school_gen = SchoolIdGenerator()
-    with tqdm(total=len(geodata), unit="people") as progress:
-        for index, (_i, row) in enumerate(geodata.iterrows()):
-            zone_id = index
-            school_gen_urb = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
-            school_gen_rural = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
+    school_gen_urb = {}
+    school_gen_rural = {}
+    for zone_id,(_i, row) in enumerate(geodata.iterrows()):
+        school_gen_urb[zone_id] = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
+        school_gen_rural[zone_id] = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
+
+    es_flia_urbana = []
+    with tqdm(total=geodata['poblacion'].sum(), unit="people") as progress:
+        for zone_id, (_i, row) in enumerate(geodata.iterrows()):
             rural_urbano_flias = urbano_rurales[row['dpto_id']].get(k = int(row['hogares']))
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
             parentescos_d = parentescos[row['dpto_id']]
@@ -265,7 +276,7 @@ def generate(genpop_dataset = None, frac=1.):
                     for p,estudiav in zip(people, estudian):
                         es_urbana = es_flia_urbana[population.people[p].family]
                         if estudiav == 'Asiste':
-                            population.people[p].escuela = school_gen_urb.get_school() if es_urbana else school_gen_rural.get_school()
+                            population.people[p].escuela = school_gen_urb[random.choice(school_zones[zone_id])].get_school() if es_urbana else school_gen_rural[random.choice(school_zones[zone_id])].get_school()
                         else:
                             population.people[p].escuela = 0
                 if int(edadv)>=14:
@@ -279,7 +290,7 @@ def generate(genpop_dataset = None, frac=1.):
 
 
 def main():
-    generate(frac=0.01).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'), os.path.join(DATA_DIR, 'fake_population_small.gpkg'))
+    generate(prov_id=82, frac=1.0).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'), os.path.join(DATA_DIR, 'fake_population_small.gpkg'))
 
 if __name__ == "__main__":
     main()

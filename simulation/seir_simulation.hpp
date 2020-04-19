@@ -19,8 +19,7 @@ class SeirSimulation{
         SCHOOL_CONTACT,
         WORK_CONTACT,
         NEIGHBOURHOOD_CONTACT,
-        INTER_NEIGHBOURHOOD_CONTACT,
-        INTER_COUNTRY_CONTACT,
+        INTER_PROVINCE_CONTACT,
         IMPORTED_CASE,
         UNDEFINED,
         TRANSITION_REASONS_COUNT
@@ -30,8 +29,7 @@ class SeirSimulation{
         "SCHOOL_CONTACT",
         "WORK_CONTACT",
         "NEIGHBOURHOOD_CONTACT",
-        "INTER_NEIGHBOURHOOD_CONTACT",
-        "INTER_COUNTRY_CONTACT",
+        "INTER_PROVINCE_CONTACT",
         "IMPORTED_CASE",
         "UNDEFINED"
     };
@@ -119,45 +117,33 @@ class SeirSimulation{
     }
 
     void neighbourhood_contact_step(){
-        const double beta = parameters["neighbourhood_contact_probability"].get<double>();
-        for(const auto& env_st: state.get_environments(NEIGHBOURHOOD)){
-            add_delta_safe(Delta(
-                SUSCEPTIBLE,
-                EXPOSED,
-                NEIGHBOURHOOD_CONTACT,
-                pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
-            ));
-        }
-    }
-    void inter_neighbourhood_contact_step(){
         const double beta = parameters["neighbourhood_contact_probability"].get<double>()/100;
         for(unsigned i=0; i<state.population.num_zones; i++){
             auto &env_st = state.get_environments(NEIGHBOURHOOD)[i];
             for(const auto j: state.population.nearests_zones[i]){
                 auto &env_st2 = state.get_environments(NEIGHBOURHOOD)[j];
-                assert(i!=j);
                 add_delta_safe(Delta(
                     SUSCEPTIBLE,
                     EXPOSED,
-                    INTER_NEIGHBOURHOOD_CONTACT,
+                    NEIGHBOURHOOD_CONTACT,
                     pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st2.people[INFECTED_1].size())
                 ));
             }
         }
     }
 
-    void inter_country_contact_step(){
+    void inter_province_contact_step(){
         auto &env_st = state.get_environments(COUNTRY)[0];
         add_delta_safe(Delta(
             SUSCEPTIBLE,
             EXPOSED,
-            INTER_COUNTRY_CONTACT,
+            INTER_PROVINCE_CONTACT,
             pick_with_probability(env_st.people[SUSCEPTIBLE], parameters["inter_province_contact_probability"].get<double>()*env_st.people[INFECTED_1].size())
         ));
     }
 
     void cases_evolution_step(){
-        for(int age=0; age<=MAX_AGE; age++){
+        for(int age=0; age<=state.population.max_age; age++){
             add_delta_safe(Delta(
                 EXPOSED,
                 INFECTED_1,
@@ -212,8 +198,7 @@ class SeirSimulation{
         home_contact_step();
         school_contact_step();
         neighbourhood_contact_step();
-        inter_neighbourhood_contact_step();
-        inter_country_contact_step();
+        inter_province_contact_step();
         cases_evolution_step();
         for(const Delta& d: deltas){
             d.apply(state, state_trans_by_zone);

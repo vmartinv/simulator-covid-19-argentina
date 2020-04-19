@@ -64,15 +64,15 @@ def store_densidad():
 
 def store_fake_population():
     POPULATIONS = [
-        ('fake_population_small', 0.01),
-        ('fake_population', 1.0),
+        ('fake_population_small', 82, 1.0),
+        ('fake_population', None, 1.0),
     ]
-    for name, frac in POPULATIONS:
+    for name, prov_id, frac in POPULATIONS:
         basefile = os.path.join(DATA_DIR, name)
         output_files = [basefile+ext for ext in ['.dat', '.json', '.gpkg']]
         if any(not os.path.exists(f) for f in output_files):
             print(f"Generating {basefile}...")
-            fake_population_generator.generate(frac=frac).to_dat(*output_files)
+            fake_population_generator.generate(prov_id=prov_id, frac=frac).to_dat(*output_files)
 
 def store_schools():
     EDUCACION_DIR = os.path.join(DATA_DIR, "ministerio-educacion")

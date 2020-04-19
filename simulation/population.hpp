@@ -129,8 +129,12 @@ private:
 
     void validate() const {
         LOG(info) << "Validating database...";
+        ProgressBar progressBar(nearests_zones.size()+people.size()+families.size());
         fail_if(num_zones != nearests_zones.size(), "Not all zones have neighbourhood list");
-        ProgressBar progressBar(people.size()+families.size());
+        for(unsigned i=1; i<num_zones; i++){
+            fail_if(find(begin(nearests_zones[i]), end(nearests_zones[i]), i)==end(nearests_zones[i]), "Nearests zones don't include themselves");
+            ++progressBar;
+        }
         unsigned last_zone=families[0].zone;
         unsigned last_dpto=families[0].dpto;
         unsigned last_prov=families[0].prov;
