@@ -130,13 +130,12 @@ private:
     void validate() const {
         LOG(info) << "Validating database...";
         fail_if(num_zones != nearests_zones.size(), "Not all zones have neighbourhood list");
-        ProgressBar progressBar(people.size()+families.size(), 70);
+        ProgressBar progressBar(people.size()+families.size());
         unsigned last_zone=families[0].zone;
         unsigned last_dpto=families[0].dpto;
         unsigned last_prov=families[0].prov;
         for(unsigned i=1; i<families.size(); i++){
             fail_if(families[i].zone-last_zone<0, "Zones not in ascending order");
-            fail_if(families[i].zone-last_zone>1, "Zones don't have all the ids");
             last_zone = families[i].zone;
 
             fail_if(families[i].dpto-last_dpto<0, "Dptos not in ascending order");

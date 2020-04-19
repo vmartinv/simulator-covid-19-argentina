@@ -28,6 +28,7 @@ int main(int argc, const char *argv[]){
         desc.add_options()
         ("help,h", "Help screen")
         ("silent", "Silent mode")
+        ("progress-only", "Silent mode with progress bar")
         ("seed,s", value<int>()->default_value(0), "Seed used by the simulation (0 means random seed)")
         ("days,d", value<unsigned>()->default_value(30), "Numbers of days to simulate")
         ("population,p", value<string>()->default_value(FAKE_DB_FILE.string()), "Basename of the fake population database (created by fake_population_generator.py)")
@@ -45,10 +46,10 @@ int main(int argc, const char *argv[]){
     {
         cerr << ex.what() << '\n';
     }
-    if(vm.count("silent")){
+    if(vm.count("silent") || vm.count("progress-only")){
         logging::core::get()->set_filter
         (
-            logging::trivial::severity >= logging::trivial::error
+            logging::trivial::severity >= logging::trivial::warning
         );
         ProgressBar::show = false;
     }
@@ -65,7 +66,8 @@ int main(int argc, const char *argv[]){
     );
     simulation.run(
         vm["days"].as<unsigned>(),
-        vm["json"].as<string>()
+        vm["json"].as<string>(),
+        vm.count("progress-only")? ProgressBar::FORCE_SHOW : ProgressBar::HIDE
     );
     return 0;
 }

@@ -9,14 +9,15 @@ private:
     unsigned int ticks = 0;
 
     const unsigned int total_ticks;
-    const unsigned int bar_width;
+    const unsigned int bar_width = 70;
     const char complete_char = '=';
     const char incomplete_char = ' ';
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
     const unsigned int step;
+    const bool override_show = false;
 
     inline void display() {
-        if(!show) return;
+        if(!override_show) return;
         float progress = (float) ticks / total_ticks;
         unsigned pos = (int) (bar_width * progress);
         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
@@ -35,10 +36,12 @@ private:
     }
 public:
     static bool show;
-    ProgressBar(unsigned int total, unsigned int width, char complete, char incomplete) :
-            total_ticks {total}, bar_width {width}, complete_char {complete}, incomplete_char {incomplete}, step {total/width} {}
-
-    ProgressBar(unsigned int total, unsigned int width) : total_ticks {total}, bar_width {width}, step {total/width}  {}
+    enum ShowMode {
+        DEFAULT,
+        HIDE,
+        FORCE_SHOW
+    };
+    ProgressBar(unsigned int total, ShowMode show_mode=DEFAULT, unsigned int width=70) : total_ticks {total}, bar_width {width}, step {std::max(total/width, 1U)}, override_show {show_mode==FORCE_SHOW || (show_mode==DEFAULT && show) }  {}
 
 
     inline void operator++() {
@@ -51,7 +54,7 @@ public:
     {
         ticks = total_ticks;
         display();
-        if(show)
+        if(override_show)
             std::cout << std::endl;
     }
 };
