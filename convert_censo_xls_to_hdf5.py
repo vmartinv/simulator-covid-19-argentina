@@ -6,7 +6,6 @@ import glob
 import pandas as pd
 import errno
 import re
-from utils.utils import fix_encoding, normalize_dpto_name
 import argparse
 DATA_DIR = os.path.join('data', 'argentina', 'censo-2010')
 README_FILE = os.path.join(DATA_DIR, 'README.md')
@@ -64,10 +63,10 @@ def parse_xls(xls):
     dataset_fixed = {INDEX: []}
     for area, cols in dataset.items():
         for col in cols:
-            dataset_fixed[fix_encoding(col)] = []
+            dataset_fixed[col] = []
     for area, cols in dataset.items():
         dataset_fixed[INDEX].append(area)
-        dataset[area] = {fix_encoding(col): vals for col,vals in cols.items()}
+        dataset[area] = {col: vals for col,vals in cols.items()}
         for col in dataset_fixed.keys():
             if col != INDEX:
                 value = dataset[area][col] if col in dataset[area] else '0'
