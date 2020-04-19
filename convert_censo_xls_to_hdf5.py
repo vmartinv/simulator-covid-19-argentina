@@ -135,7 +135,18 @@ def convert_single(xls, dst):
         return 1
 
 def main():
-    argsp = argparse.ArgumentParser(description='Convert censo xls format to csv or hdf')
+    argsp = argparse.ArgumentParser(description="""
+Convert censo xls format to csv or hdf.
+Steps to get the xls files:
+    redatam.indec.gob.ar->
+    Procesar en En-Linea->Poblacion y vivienda->
+    Censo Nacional de Poblacion, Hogares y Viviendas 2010 - Basico->
+    Resultados Basicos->
+    Frecuencias or Cruces->
+    Select desired parameters (only tested with Corte de area=deparmento)->
+    Ejecutar->
+    Descargar en formato Excel (at the bottom)
+""".strip())
 
     argsp.add_argument('xls',
                         metavar='xls',
