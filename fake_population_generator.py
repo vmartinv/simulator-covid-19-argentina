@@ -20,32 +20,62 @@ PXLOC = os.path.join(DATA_DIR, 'datosgobar-densidad-poblacion', 'pais.geojson')
 SCHOOL_HDF = os.path.join(DATA_DIR, 'ministerio-educacion', 'matricula_y_secciones.hdf')
 
 class Person:
-    def __init__(self, id, family, zone, edad, sexo, escuela, trabajo):
+    def __init__(self, id, family, edad, sexo, escuela, trabajo):
         self.id = id
         self.family = family
-        self.zone = zone
         self.edad = edad
         self.sexo = sexo
         self.escuela = escuela
         self.trabajo = trabajo
 
     def pack(self):
-        struct_format = '>IIHB?II'
-        return struct.pack(struct_format, self.id, self.family, self.zone, int(self.edad), self.sexo == 'Mujer', self.escuela, self.trabajo)
+        struct_format = '>IB?II'
+        return struct.pack(struct_format, self.family, int(self.edad), self.sexo == 'Mujer', self.escuela, self.trabajo)
+
+class Family:
+    def __init__(self, id, zone, dpto, prov):
+        self.id = id
+        self.zone = zone
+        self.dpto = dpto
+        self.prov = prov
+
+    def pack(self):
+        struct_format = '>HHH'
+        return struct.pack(struct_format, self.zone, int(self.dpto), int(self.prov))
+
 
 class Population:
     def __init__(self):
         self.people = []
+        self.families = []
         self.nearest_zones = []
         self.geodata = None
+        self.dpto_map = {}
+        self.prov_map = {}
+
+    def get_dpto_id(self, name):
+        if name not in self.dpto_map:
+            self.dpto_map[name] = len(self.dpto_map)
+        return self.dpto_map[name]
+
+    def get_prov_id(self, name):
+        if name not in self.prov_map:
+            self.prov_map[name] = len(self.prov_map)
+        return self.prov_map[name]
 
     def to_dat(self, dat_file, json_file, geopackage_file):
         with open(json_file, 'w') as fout:
             json.dump({
                 'nearest_zones': self.nearest_zones,
+                'departaments': [i[0] for i in sorted(self.dpto_map.items(), key=lambda i: i[1])],
+                'provinces': [i[0] for i in sorted(self.prov_map.items(), key=lambda i: i[1])],
             }, fout)
         self.geodata.to_file(geopackage_file, driver="GPKG")
         with open(dat_file, mode='wb') as fout:
+            fout.write(struct.pack(">I", len(self.families)))
+            for p in tqdm(self.families):
+                fout.write(p.pack())
+            fout.write(struct.pack(">I", len(self.people)))
             for p in tqdm(self.people):
                 fout.write(p.pack())
 
@@ -176,6 +206,7 @@ def generate(genpop_dataset = None, frac=1.):
     escuelas = {}
     trabajos = {}
     geodata = geodata.sample(frac=frac)
+    geodata.sort_values(['prov_id', 'dpto_id'], inplace=True)
     population.geodata = geodata
 
     print("Calculating nearests zones...")
@@ -193,10 +224,9 @@ def generate(genpop_dataset = None, frac=1.):
         trabajos[row['area']] = {k: GenWithDistribution(v, row) for k, v in edad_cross_trabaja.items()}
 
     print("Generating population...")
-    num_families = 0
     es_flia_urbana = []
     school_gen = SchoolIdGenerator()
-    with tqdm(total=40e6*frac, unit="people") as progress:
+    with tqdm(total=len(geodata), unit="people") as progress:
         for index, (_i, row) in enumerate(geodata.iterrows()):
             zone_id = index
             school_gen_urb = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos urbano'])
@@ -213,13 +243,13 @@ def generate(genpop_dataset = None, frac=1.):
                 urbano = urbano=='Urbano'
                 tam_flia_num = int(tam_flia.replace('8 y más', str(random.choices(range(8, 16))[0])))
                 parentescos_flia = parentescos_d[tam_flia].get(k=tam_flia_num)
-                family_id = num_families
+                family_id = len(population.families)
                 es_flia_urbana.append(urbano)
-                num_families += 1
+                population.families.append(Family(family_id, zone_id, population.get_dpto_id(row['dpto_id']), population.get_prov_id(row['prov_id'])))
                 for member in parentescos_flia:
                     id = len(population.people)
                     by_parentesco[member].append(id)
-                    population.people.append(Person(id, family_id, zone_id, None, None, 0, False))
+                    population.people.append(Person(id, family_id, None, None, 0, False))
                     progress.update()
             by_edad = defaultdict(list)
             for parentesco, people in by_parentesco.items():

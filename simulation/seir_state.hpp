@@ -84,7 +84,7 @@ public:
         progressBar.done();
         generate_environments();
     }
-    
+
     void change_state(const PersonId &id, const PersonState &nw){
         const PersonState old = estado_persona[id].state;
         if(old==nw){
@@ -129,13 +129,14 @@ private:
         environments[NEIGHBOURHOOD].resize(population.num_zones);
         environments[SCHOOL].resize(population.num_schools);
         for(const auto& p: population.people){
+            const unsigned zone = population.families[p.family].zone;
             estado_persona[p.id].environment_id[HOME] = p.family;
             estado_persona[p.id].index_on_environment[HOME] = environments[HOME][p.family].susceptibles.size();
             environments[HOME][p.family].susceptibles.push_back(p.id);
 
-            estado_persona[p.id].environment_id[NEIGHBOURHOOD] = p.zone;
-            estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][p.zone].susceptibles.size();
-            environments[NEIGHBOURHOOD][p.zone].susceptibles.push_back(p.id);
+            estado_persona[p.id].environment_id[NEIGHBOURHOOD] = zone;
+            estado_persona[p.id].index_on_environment[NEIGHBOURHOOD] = environments[NEIGHBOURHOOD][zone].susceptibles.size();
+            environments[NEIGHBOURHOOD][zone].susceptibles.push_back(p.id);
 
             if(p.escuela!=Population::NO_SCHOOL){
                 estado_persona[p.id].environment_id[SCHOOL] = p.escuela;

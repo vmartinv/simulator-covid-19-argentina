@@ -42,9 +42,10 @@ class SeirSimulation{
         void apply(SeirState &state, vector<vector<unsigned>> &state_trans_by_zone) const {
             for(const PersonId id: lst){
                 if(state.get_estado_persona(id)==src){
+                    const unsigned zone = state.population.families[state.population.people[id].family].zone;
                     state.change_state(id, dst);
                     state_trans_by_zone.back()[static_cast<int>(reason)]++;
-                    state_trans_by_zone[state.population.people[id].zone][static_cast<int>(reason)]++;
+                    state_trans_by_zone[zone][static_cast<int>(reason)]++;
                 }
             }
         }
@@ -166,20 +167,21 @@ class SeirSimulation{
         report["general"]["day"].push_back(day);
         report["general"]["compute_time_ms"].push_back(duration);
         for(auto st=0; st<PERSON_STATE_COUNT; st++){
-            unsigned count = state.count_state(static_cast<PersonState>(st));
+            const unsigned count = state.count_state(static_cast<PersonState>(st));
             report["general"][person_state_text[st]].push_back(count);
             LOG(info) << person_state_text[st] << ": " << count;
         }
         for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
-            unsigned count = state_trans_by_zone.back()[tr];
+            const unsigned count = state_trans_by_zone.back()[tr];
             report["general"][transition_reason_text[tr]].push_back(count);
             LOG(info) << transition_reason_text[tr] << ": " << count;
         }
 
         vector<vector<int>> state_count_by_zone(state.population.num_zones, vector<int>(PERSON_STATE_COUNT));
         for(const Person& p: state.population.people){
-            auto st = state.get_estado_persona(p.id);
-            state_count_by_zone[p.zone][static_cast<int>(st)]++;
+            const auto st = state.get_estado_persona(p.id);
+            const unsigned zone = state.population.families[p.family].zone;
+            state_count_by_zone[zone][static_cast<int>(st)]++;
         }
         for(unsigned zone=0; zone<state.population.num_zones; zone++){
             report["by_zone"]["day"].push_back(day);
@@ -188,11 +190,11 @@ class SeirSimulation{
                 report["by_zone"][person_state_text[st]].push_back(state_count_by_zone[zone][st]);
             }
             for(auto tr=0; tr<TRANSITION_REASONS_COUNT; tr++){
-                unsigned count = state_trans_by_zone[zone][tr];
+                const unsigned count = state_trans_by_zone[zone][tr];
                 report["by_zone"][transition_reason_text[tr]].push_back(count);
             }
         }
-        auto alive_count = state.population.people.size()-state.count_state(DEAD);
+        const auto alive_count = state.population.people.size()-state.count_state(DEAD);
         LOG(info) << "TOTAL ALIVE: " << alive_count;
         LOG(info) << "TIME TAKEN: " << duration << "ms";
     }
