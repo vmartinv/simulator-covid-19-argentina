@@ -7,6 +7,7 @@ import pandas as pd
 import errno
 import re
 from utils.utils import fix_encoding, normalize_dpto_name
+import argparse
 DATA_DIR = os.path.join('data', 'argentina', 'censo-2010')
 README_FILE = os.path.join(DATA_DIR, 'README.md')
 DEBUG = False
@@ -110,5 +111,40 @@ def convert_all():
             for col in sorted(summary[t]):
                 f.write(f'    - {col}\n')
 
+def convert_single(xls, dst):
+    if not os.path.exists(xls):
+        print(f"Error: file not found {xls}")
+        return 1
+    dataset = parse_xls(xls)
+    if dataset is not None:
+        name = os.path.basename(dst).replace('-', '_')
+        df = pd.DataFrame(dataset, columns=dataset.keys())
+        if dst.endswith('.hdf'):
+            df.to_hdf(dst, name, mode='w')
+        elif dst.endswith('.csv'):
+            df.to_csv(dst, mode='w')
+        else:
+            print(f"Error: unknown output format for file {dst}")
+            return 1
+        print(f"Saved to {dst}")
+        return 0
+    else:
+        print(f"Error: error parsing file {xls}")
+        return 1
+
+def main():
+    argsp = argparse.ArgumentParser(description='Convert censo xls format to csv or hdf')
+
+    argsp.add_argument('xls',
+                        metavar='xls',
+                        type=str,
+                        help='Path to the xls generated from redatam')
+    argsp.add_argument('output',
+                        metavar='output',
+                        type=str,
+                        help='Path to the output file (csv or hdf)')
+    args = argsp.parse_args()
+    return convert_single(args.xls, args.output)
+
 if __name__ == "__main__":
-    convert_all()
+    exit(main())
