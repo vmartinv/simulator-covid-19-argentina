@@ -7,6 +7,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include "progress_bar.hpp"
+#include "simulation_parameters.hpp"
 #include "seir_state.hpp"
 using namespace std;
 using namespace std::chrono;
@@ -54,7 +55,7 @@ class SeirSimulation{
     };
     vector<vector<unsigned>> state_trans_by_zone;
     SeirState state;
-    const DiseaseParameters disease;
+    const SimulationParameters parameters;
     mt19937 generator;
     vector<Delta> deltas;
 
@@ -85,7 +86,7 @@ class SeirSimulation{
 
     void introduce_new_cases_step(int day){
         if(day<=16){
-            int new_cases = ceil(disease.initial_new_cases * pow(disease.new_cases_rate, day));
+            int new_cases = ceil(parameters["initial_new_cases"].get<double>() * pow(parameters["new_cases_rate"].get<double>(), day));
             add_delta_safe(Delta(
                 SUSCEPTIBLE,
                 EXPOSED,
@@ -95,37 +96,41 @@ class SeirSimulation{
         }
     }
     void home_contact_step(){
+        const double beta = parameters["home_contact_probability"].get<double>();
         for(const auto& env_st: state.get_environments(HOME)){
             add_delta_safe(Delta(
                 SUSCEPTIBLE,
                 EXPOSED,
                 HOME_CONTACT,
-                pick_with_probability(env_st.people[SUSCEPTIBLE], 0.1*env_st.people[INFECTED_1].size())
+                pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
             ));
         }
     }
     void school_contact_step(){
+        const double beta = parameters["school_contact_probability"].get<double>();
         for(const auto& env_st: state.get_environments(SCHOOL)){
             add_delta_safe(Delta(
                 SUSCEPTIBLE,
                 EXPOSED,
                 SCHOOL_CONTACT,
-                pick_with_probability(env_st.people[SUSCEPTIBLE], 0.01*env_st.people[INFECTED_1].size())
+                pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
             ));
         }
     }
 
     void neighbourhood_contact_step(){
+        const double beta = parameters["neighbourhood_contact_probability"].get<double>();
         for(const auto& env_st: state.get_environments(NEIGHBOURHOOD)){
             add_delta_safe(Delta(
                 SUSCEPTIBLE,
                 EXPOSED,
                 NEIGHBOURHOOD_CONTACT,
-                pick_with_probability(env_st.people[SUSCEPTIBLE], 0.001*env_st.people[INFECTED_1].size())
+                pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
             ));
         }
     }
     void inter_neighbourhood_contact_step(){
+        const double beta = parameters["neighbourhood_contact_probability"].get<double>()/100;
         for(unsigned i=0; i<state.population.num_zones; i++){
             auto &env_st = state.get_environments(NEIGHBOURHOOD)[i];
             for(const auto j: state.population.nearests_zones[i]){
@@ -135,7 +140,7 @@ class SeirSimulation{
                     SUSCEPTIBLE,
                     EXPOSED,
                     INTER_NEIGHBOURHOOD_CONTACT,
-                    pick_with_probability(env_st.people[SUSCEPTIBLE], 0.00001*env_st2.people[INFECTED_1].size())
+                    pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st2.people[INFECTED_1].size())
                 ));
             }
         }
@@ -147,7 +152,7 @@ class SeirSimulation{
             SUSCEPTIBLE,
             EXPOSED,
             INTER_COUNTRY_CONTACT,
-            pick_with_probability(env_st.people[SUSCEPTIBLE], 0.0000001*env_st.people[INFECTED_1].size())
+            pick_with_probability(env_st.people[SUSCEPTIBLE], parameters["inter_province_contact_probability"].get<double>()*env_st.people[INFECTED_1].size())
         ));
     }
 
@@ -157,46 +162,46 @@ class SeirSimulation{
                 EXPOSED,
                 INFECTED_1,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[EXPOSED], disease.fraction_become_mild)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[EXPOSED], parameters["fraction_become_mild"].get<double>())
             ));
 
             add_delta_safe(Delta(
                 INFECTED_1,
                 RECOVERED,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], disease.fraction_recover_from_mild)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], parameters["fraction_recover_from_mild"].get<double>())
             ));
             add_delta_safe(Delta(
                 INFECTED_1,
                 INFECTED_2,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], disease.fraction_severe_from_mild)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], parameters["fraction_severe_from_mild"].get<double>())
             ));
 
             add_delta_safe(Delta(
                 INFECTED_2,
                 RECOVERED,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], disease.fraction_recover_from_severe)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], parameters["fraction_recover_from_severe"].get<double>())
             ));
             add_delta_safe(Delta(
                 INFECTED_2,
                 INFECTED_3,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], disease.fraction_critical_from_severe)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], parameters["fraction_critical_from_severe"].get<double>())
             ));
 
             add_delta_safe(Delta(
                 INFECTED_3,
                 RECOVERED,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], disease.fraction_recover_from_critical)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], parameters["fraction_recover_from_critical"].get<double>())
             ));
             add_delta_safe(Delta(
                 INFECTED_3,
                 DEAD,
                 UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], disease.fraction_death_from_critical)
+                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], parameters["fraction_death_from_critical"].get<double>())
             ));
         }
     }
@@ -268,7 +273,7 @@ class SeirSimulation{
     }
 
 public:
-    SeirSimulation(Population population, const DiseaseParameters &disease, const unsigned int seed=0): state(population), disease(disease), generator(seed? seed : random_device{}()) {
+    SeirSimulation(Population population, const SimulationParameters &parameters, const unsigned int seed=0): state(population), parameters(parameters), generator(seed? seed : random_device{}()) {
         assert(TRANSITION_REASONS_COUNT == sizeof(transition_reason_text)/sizeof(transition_reason_text[0]));
     }
 
