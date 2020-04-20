@@ -7,9 +7,6 @@ import pandas as pd
 import errno
 import re
 import argparse
-DATA_DIR = os.path.join('data', 'argentina', 'censo-2010')
-README_FILE = os.path.join(DATA_DIR, 'README.md')
-DEBUG = False
 
 INDEX = 'area'
 
@@ -74,43 +71,6 @@ def parse_xls(xls):
                 dataset_fixed[col].append(value)
     dataset = dataset_fixed
     return dataset
-
-
-def convert_all():
-    combined_dataset = None
-    hdf_file = os.path.join(DATA_DIR, 'censo.hdf5')
-    try:
-        os.remove(hdf_file)
-    except OSError as e:
-        if e.errno != errno.ENOENT:
-            raise e
-    summary = {}
-    for xls in sorted(glob.glob(os.path.join(DATA_DIR, '*.xls'))):
-        (filename, ext) = os.path.splitext(xls)
-        print(f"Converting {xls}...")
-        dataset = parse_xls(xls)
-        if dataset is not None:
-            name = os.path.basename(filename).replace('-', '_')
-            summary[name] = set(dataset.keys())-set([INDEX])
-            if combined_dataset is None:
-                combined_dataset = dataset
-            else:
-                assert dataset[INDEX] == combined_dataset[INDEX], str(sorted(set(dataset[INDEX])^set(combined_dataset[INDEX])))
-            df = pd.DataFrame(dataset, columns=dataset.keys())
-            df.to_hdf(hdf_file, name, mode='a')
-            print(f"Saved to {hdf_file}")
-        else:
-            print(f"Warning: not parsing file {xls}")
-    with open(README_FILE, 'w') as f:
-        f.write('Generado a partir del censo 2010 utilizando https://redatam.indec.gob.ar/\n')
-        f.write('Fuente: elaboración propia en base a datos del INDEC. Censo Nacional de Población, Hogares y Viviendas 2010, procesado con Redatam+SP\n')
-        f.write('\n')
-        f.write('# Descripcion de {hdf_file}\n')
-        f.write('Las tablas son indexadas por departamento.\n')
-        for t in summary:
-            f.write(f'\nTabla {t}, columnas:\n')
-            for col in sorted(summary[t]):
-                f.write(f'    - {col}\n')
 
 def convert_single(xls, dst):
     if not os.path.exists(xls):

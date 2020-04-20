@@ -5,3 +5,7 @@ data/argentina/ministerio-educacion
 ministerio-educacion
 simulation_results.json
 transporte
+indec/pxdptodatos*
+indec/pxlocdatos*
+indec/Codgeo_Pais*
+censo-2010

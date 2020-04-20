@@ -6,6 +6,7 @@ import fake_population_generator
 import glob
 import shutil
 import convert_school_db
+import gen_censo_db
 
 DATA_DIR = os.path.join('data', 'argentina')
 
@@ -103,10 +104,18 @@ def store_transporte():
     dst = os.path.join(TRANSPORTE_DIR, "tdma2017.geojson")
     download_url(URL, dst)
 
+def store_censo():
+    censo_dir = os.path.join(DATA_DIR, 'censo-2010')
+    ensure_dir_exists(censo_dir)
+    hdf = os.path.join(censo_dir, 'censo.hdf5')
+    if not os.path.exists(hdf):
+        gen_censo_db.store_all(censo_dir, hdf)
+
 def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
     store_densidad()
+    store_censo()
     store_schools()
     store_transporte()
     store_fake_population()

@@ -187,7 +187,7 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
         genpop_dataset = load_population_census()
     geodata, census = genpop_dataset
     population = Population()
-    tamanios_familia = ['1', '2', '3', '4', '5', '6', '7', '8 y más']
+    tamanios_familia = ['1', '2', '3', '4', '5', '6', '7', '8 o más']
     parentescos = ['Cónyuge o pareja', 'Hijo(a) / Hijastro(a)', 'Jefe(a)', 'Nieto(a)', 'Otros familiares', 'Otros no familiares', 'Padre / Madre / Suegro(a)', 'Servicio doméstico y sus familiares', 'Yerno / Nuera']
     edad = list(map(str, range(111)))
     sexo = ['Mujer', 'Varón']
@@ -240,7 +240,8 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
         school_gen_rural[zone_id] = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
 
     es_flia_urbana = []
-    with tqdm(total=geodata['poblacion'].sum(), unit="people") as progress:
+    expected_people = geodata['poblacion'].astype(float).astype(int).sum()
+    with tqdm(total=expected_people, unit="people") as progress:
         for zone_id, (_i, row) in enumerate(geodata.iterrows()):
             rural_urbano_flias = urbano_rurales[row['dpto_id']].get(k = int(row['hogares']))
             tamanios_flias = tamanios[row['dpto_id']].get(k = int(row['hogares']))
@@ -252,7 +253,7 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
             by_parentesco = defaultdict(list)
             for tam_flia, urbano in zip(tamanios_flias, rural_urbano_flias):
                 urbano = urbano=='Urbano'
-                tam_flia_num = int(tam_flia.replace('8 y más', str(random.choices(range(8, 16))[0])))
+                tam_flia_num = int(tam_flia.replace('8 o más', str(random.choices(range(8, 16))[0])))
                 parentescos_flia = parentescos_d[tam_flia].get(k=tam_flia_num)
                 family_id = len(population.families)
                 es_flia_urbana.append(urbano)
@@ -290,7 +291,7 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
 
 
 def main():
-    generate(prov_id=82, frac=1.0).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'), os.path.join(DATA_DIR, 'fake_population_small.gpkg'))
+    generate(prov_id=66, frac=1.0).to_dat(os.path.join(DATA_DIR, 'fake_population_small.dat'), os.path.join(DATA_DIR, 'fake_population_small.json'), os.path.join(DATA_DIR, 'fake_population_small.gpkg'))
 
 if __name__ == "__main__":
     main()
