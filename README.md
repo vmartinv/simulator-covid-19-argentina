@@ -12,7 +12,7 @@ Install [miniconda](https://docs.conda.io/en/latest/miniconda.html) and run:
     conda env create -f conda_environment.yml -n covid-ar python=3
     conda activate covid-ar
     export PATH=${CONDA_PREFIX}/bin:$PATH
-    ./generate_databases.py
+    gen_dbs/generate_databases.py
 
 ## Usage
 See different notebooks experiments (`.ipynb` files) with [jupyter](https://jupyter.org):
