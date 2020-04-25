@@ -9,9 +9,9 @@ dependencies:
   - blas=1.0=mkl
   - bleach=3.1.4=py_0
   - bzip2=1.0.8=h1de35cc_0
-  - ca-certificates=2020.4.5.1=hecc5488_0
+  - ca-certificates=2020.1.1=0
   - cairo=1.14.12=hc4e6be7_4
-  - certifi=2020.4.5.1=py38h32f6830_0
+  - certifi=2020.4.5.1=py38_0
   - click=7.1.1=py_0
   - click-plugins=1.1.1=py_0
   - cligj=0.5.0=py38_0
@@ -98,7 +98,7 @@ dependencies:
   - numpy=1.18.1=py38h7241aed_0
   - numpy-base=1.18.1=py38h6575580_1
   - openjpeg=2.3.0=hb95cd4c_1
-  - openssl=1.1.1f=h0b31af3_0
+  - openssl=1.1.1g=h1de35cc_0
   - pandas=1.0.3=py38h6c726b0_0
   - pandoc=2.2.3.2=0
   - pandocfilters=1.4.2=py38_1
@@ -121,9 +121,8 @@ dependencies:
   - pyrsistent=0.16.0=py38h1de35cc_0
   - python=3.8.2=hfe9666f_0
   - python-dateutil=2.8.1=py_0
-  - python_abi=3.8=1_cp38
   - pytz=2019.3=py_0
-  - pyyaml=5.3.1=py38h64e0658_0
+  - pyyaml=5.3.1=py38h1de35cc_0
   - pyzmq=18.1.1=py38h0a44026_0
   - qt=5.9.7=h468cd18_1
   - qtconsole=4.7.2=py_0
@@ -148,7 +147,7 @@ dependencies:
   - widgetsnbextension=3.5.1=py38_0
   - xerces-c=3.2.2=h44e365a_0
   - xz=5.2.5=h1de35cc_0
-  - yaml=0.2.3=h0b31af3_0
+  - yaml=0.1.7=hc338f04_2
   - zeromq=4.3.1=h0a44026_3
   - zipp=2.2.0=py_0
   - zlib=1.2.11=h1de35cc_3

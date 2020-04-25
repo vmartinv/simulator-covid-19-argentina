@@ -49,6 +49,7 @@ class Population:
         self.people = []
         self.families = []
         self.nearest_zones = []
+        self.nearest_densities = []
         self.geodata = None
         self.dpto_map = {}
         self.prov_map = {}
@@ -63,12 +64,19 @@ class Population:
             self.prov_map[name] = len(self.prov_map)
         return self.prov_map[name]
 
+    def calculate_ids(self):
+        self.departments = [i[0] for i in sorted(self.dpto_map.items(), key=lambda i: i[1])]
+        self.provinces = [i[0] for i in sorted(self.prov_map.items(), key=lambda i: i[1])]
+
     def to_dat(self, dat_file, json_file, geopackage_file):
         with open(json_file, 'w') as fout:
             json.dump({
                 'nearest_zones': self.nearest_zones,
-                'departaments': [i[0] for i in sorted(self.dpto_map.items(), key=lambda i: i[1])],
-                'provinces': [i[0] for i in sorted(self.prov_map.items(), key=lambda i: i[1])],
+                'nearest_densities': self.nearest_densities,
+                'department_densities': self.department_densities,
+                'province_densities': self.province_densities,
+                'departaments': self.departments,
+                'provinces': self.provinces,
             }, fout)
         self.geodata.to_file(geopackage_file, driver="GPKG")
         with open(dat_file, mode='wb') as fout:
@@ -147,9 +155,10 @@ def nearests_zones(geodata, upper_bound=5000, max_nearests=1200, remove_self=Tru
 def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schooldb_file = SCHOOL_HDF):
     geodata = gpd.read_file(location_file, encoding='utf-8')
     #geodata['departamen'] = [normalize_dpto_name(n) for n in geodata['departamen']]
-    geodata['area'] = [float(a) for a in geodata['area']]
+    geodata['area'] = geodata['area'].astype(float)
+    geodata['poblacion'] = geodata['poblacion'].astype(float)
     geodata['hogares'] = [int(re.sub(r'(\d+).0+', r'\1', x)) if x else 0 for x in geodata['hogares']]
-    geodata['dpto_id'] = [int(n) for n in geodata['dpto_id']]
+    geodata['dpto_id'] = geodata['dpto_id'].astype(int)
     desired_tables = set([
         '/hogares_urbano_vs_rural',
         '/personas_por_hogar',
@@ -217,6 +226,9 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
 
     print("Calculating nearests zones...")
     population.nearest_zones = nearests_zones(geodata, 1000, 1200, remove_self=False)
+    areas = np.array(geodata['area'].astype(float))
+    poblaciones = np.array(geodata['poblacion'].astype(float))
+    population.nearest_densities = [sum(poblaciones[z] for z in zones)/sum(areas[z] for z in zones) for zones in population.nearest_zones]
     school_zones = nearests_zones(geodata, 5000, 1200, remove_self=False)
 
 
@@ -287,6 +299,15 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
                             population.people[p].trabajo = 1 #TODO: add work enviroments
                         else:
                             population.people[p].trabajo = 0
+
+        population.calculate_ids()
+
+        geo_bydpto = geodata.groupby('dpto_id')[['poblacion', 'area']].sum().reset_index().set_index('dpto_id')
+        geo_bydpto['density'] = geo_bydpto['poblacion']/geo_bydpto['area']
+        population.department_densities = [geo_bydpto['density'][dpto] for dpto in population.departments]
+        geo_byprov = geodata.groupby('prov_id')[['poblacion', 'area']].sum().reset_index().set_index('prov_id')
+        geo_byprov['density'] = geo_byprov['poblacion']/geo_byprov['area']
+        population.province_densities = [geo_byprov['density'][prov] for prov in population.provinces]
         return population
 
 

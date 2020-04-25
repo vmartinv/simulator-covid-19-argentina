@@ -117,16 +117,17 @@ class SeirSimulation{
     }
 
     void neighbourhood_contact_step(){
-        const double beta = parameters["neighbourhood_contact_probability"].get<double>()/100;
+        const double beta = parameters["neighbourhood_contact_probability"].get<double>();
         for(unsigned i=0; i<state.population.num_zones; i++){
-            auto &env_st = state.get_environments(NEIGHBOURHOOD)[i];
+            const auto &env_st = state.get_environments(NEIGHBOURHOOD)[i];
+            const double sqrtdensity = sqrt(state.population.nearest_densities[i]);
             for(const auto j: state.population.nearests_zones[i]){
-                auto &env_st2 = state.get_environments(NEIGHBOURHOOD)[j];
+                const auto &env_st2 = state.get_environments(NEIGHBOURHOOD)[j];
                 add_delta_safe(Delta(
                     SUSCEPTIBLE,
                     EXPOSED,
                     NEIGHBOURHOOD_CONTACT,
-                    pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st2.people[INFECTED_1].size())
+                    pick_with_probability(env_st.people[SUSCEPTIBLE], beta*sqrtdensity*env_st2.people[INFECTED_1].size())
                 ));
             }
         }

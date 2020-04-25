@@ -97,6 +97,9 @@ private:
         json j;
         file >> j;
         nearests_zones = vector<vector<ZoneId>>(j["nearest_zones"]);
+        nearest_densities = vector<double>(j["nearest_densities"]);
+        province_densities = vector<double>(j["province_densities"]);
+        department_densities = vector<double>(j["department_densities"]);
     }
     void load_pop(const string &pop_filename){
         LOG(info) << "Loading database " << pop_filename << "...";
@@ -138,6 +141,9 @@ private:
         unsigned last_zone=families[0].zone;
         unsigned last_dpto=families[0].dpto;
         unsigned last_prov=families[0].prov;
+        assert(last_zone == 0);
+        assert(last_dpto == 0);
+        assert(last_prov == 0);
         for(unsigned i=1; i<families.size(); i++){
             fail_if(families[i].zone-last_zone<0, "Zones not in ascending order");
             last_zone = families[i].zone;
@@ -152,6 +158,7 @@ private:
             ++progressBar;
         }
         unsigned last_family=people[0].family;
+        assert(last_family == 0);
         for(unsigned i=1; i<people.size(); i++){
             fail_if(people[i].family-last_family<0, "Families not in ascending order");
             fail_if(people[i].family-last_family>1, "Families don't have all the ids");
@@ -167,6 +174,9 @@ public:
     vector<Person> people;
     vector<Family> families;
     vector<vector<ZoneId>> nearests_zones;
+    vector<double> nearest_densities;
+    vector<double> department_densities;
+    vector<double> province_densities;
     unsigned num_families = 0;
     unsigned num_schools = 0;
     unsigned num_zones = 0;
@@ -178,8 +188,8 @@ public:
     Population(const string &pop_filename, const string &json_filename){
         load_pop(pop_filename);
         load_json(json_filename);
-        report();
         validate();
+        report();
     }
 
     inline const Person &get(const int idx) const {
@@ -199,6 +209,20 @@ public:
         LOG(info) << "Second person: " << people[1];
         LOG(info) << "Random family: " << families[rand() % families.size()];
         LOG(info) << "Random person: " << people[rand() % people.size()];
+
+        // vector<int> zone_count(num_zones, 0);
+        // for(const auto &p: people){
+        //     zone_count[families[p.family].zone]++;
+        // }
+        // for(unsigned i=0; i<num_zones; i++){
+        //     unsigned count = 0;
+        //     for(const auto &n: nearests_zones[i]){
+        //         count += zone_count[n];
+        //     }
+        //     count = nearests_zones[i].size();
+        //     cout << count << endl;
+        // }
+        // exit(0);
     }
 };
 
