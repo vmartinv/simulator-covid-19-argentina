@@ -39,6 +39,7 @@ enum Environments{
     BY_AGE,
     ENVIRONMENT_COUNT
 };
+//bool only_count_not_susceptibles[ENVIRONMENT_COUNT] = {true, true, true, true, true, false};
 const string environment_text[]={
     "HOME",
     "SCHOOL",

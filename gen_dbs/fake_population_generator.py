@@ -13,6 +13,7 @@ import numpy as np
 from collections import defaultdict
 import struct
 from scipy.spatial import cKDTree
+import math
 
 DATA_DIR = os.path.join('data', 'argentina')
 CENSO_HDF = os.path.join(DATA_DIR, 'censo-2010', 'censo.hdf5')
@@ -156,7 +157,7 @@ def load_population_census(location_file = PXLOC, census_file = CENSO_HDF, schoo
     geodata = gpd.read_file(location_file, encoding='utf-8')
     #geodata['departamen'] = [normalize_dpto_name(n) for n in geodata['departamen']]
     geodata['area'] = geodata['area'].astype(float)
-    geodata['poblacion'] = geodata['poblacion'].astype(float)
+    geodata['poblacion'] = geodata['poblacion'].astype(float).apply(lambda x: 0 if math.isnan(x) else int(x))
     geodata['hogares'] = [int(re.sub(r'(\d+).0+', r'\1', x)) if x else 0 for x in geodata['hogares']]
     geodata['dpto_id'] = geodata['dpto_id'].astype(int)
     desired_tables = set([
@@ -252,7 +253,7 @@ def generate(genpop_dataset = None, prov_id = None, frac=1.):
         school_gen_rural[zone_id] = AlumnSchoolIdGenerator(school_gen, tamanios_escuelas[row['dpto_id']]['Alumnos rural'])
 
     es_flia_urbana = []
-    expected_people = geodata['poblacion'].astype(float).astype(int).sum()
+    expected_people = geodata['poblacion'].sum()
     with tqdm(total=expected_people, unit="people") as progress:
         for zone_id, (_i, row) in enumerate(geodata.iterrows()):
             rural_urbano_flias = urbano_rurales[row['dpto_id']].get(k = int(row['hogares']))

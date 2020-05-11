@@ -13,6 +13,31 @@ using namespace std;
 using namespace std::chrono;
 using json = nlohmann::json;
 
+template <class T>
+class CircularDayQueue{
+    const size_t capacity;
+    vector<vector<T>> queue;
+    size_t current_start=0;
+public:
+    CircularDayQueue(const size_t capacity=100): capacity(capacity), queue(capacity) {}
+
+    void clear(){
+        current_start = 0;
+        for(auto& v: queue){
+            v.clear();
+        }
+    }
+    void push(const T& e, size_t days_from_now){
+        queue[(days_from_now+current_start)%capacity].push_back(e);
+    }
+
+    vector<T> pop(){
+        auto ret = move(queue[current_start]);
+        current_start = (current_start+1)%capacity;
+        return ret;
+    }
+};
+
 class SeirSimulation{
     enum TransitionReason{
         HOME_CONTACT = 0,
@@ -53,13 +78,21 @@ class SeirSimulation{
     };
     vector<vector<unsigned>> state_trans_by_zone;
     SeirState state;
+    CircularDayQueue<Delta> future_transitions;
+    uniform_real_distribution<> random_probability;
     const SimulationParameters parameters;
     mt19937 generator;
     vector<Delta> deltas;
 
-    void add_delta_safe(const Delta& delta){
-        if(!delta.lst.empty()){
-            deltas.push_back(delta);
+    void infect(const TransitionReason &tr, const vector<PersonId> &lst){
+        if(!lst.empty()){
+            deltas.push_back(Delta(
+                SUSCEPTIBLE,
+                EXPOSED,
+                tr,
+                lst
+            ));
+            prepare_future_transitions(EXPOSED, lst);
         }
     }
 
@@ -71,6 +104,20 @@ class SeirSimulation{
         binomial_distribution<int> distribution(group.size(), min(1., prob));
         sample(begin(group), end(group), back_inserter(delta), distribution(generator), generator);
         return delta;
+    }
+
+    vector<PersonId> stable_difference(const vector<PersonId> &group, const vector<PersonId> &subset){
+        vector<PersonId> ret;
+        auto it = begin(subset);
+        for(const auto &p: group){
+            if(it==end(subset) || p!=*it){
+                ret.push_back(p);
+            }
+            else{
+                ++it;
+            }
+        }
+        return ret;
     }
 
     vector<PersonId> pick_uniform(const vector<PersonId> &group, const unsigned count){
@@ -85,34 +132,28 @@ class SeirSimulation{
     void introduce_new_cases_step(int day){
         if(day<=16){
             int new_cases = ceil(parameters["initial_new_cases"].get<double>() * pow(parameters["new_cases_rate"].get<double>(), day));
-            add_delta_safe(Delta(
-                SUSCEPTIBLE,
-                EXPOSED,
+            infect(
                 IMPORTED_CASE,
                 pick_uniform(state.get_environments(COUNTRY)[0].people[SUSCEPTIBLE], new_cases)
-            ));
+            );
         }
     }
     void home_contact_step(){
         const double beta = parameters["home_contact_probability"].get<double>();
         for(const auto& env_st: state.get_environments(HOME)){
-            add_delta_safe(Delta(
-                SUSCEPTIBLE,
-                EXPOSED,
+            infect(
                 HOME_CONTACT,
                 pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
-            ));
+            );
         }
     }
     void school_contact_step(){
         const double beta = parameters["school_contact_probability"].get<double>();
         for(const auto& env_st: state.get_environments(SCHOOL)){
-            add_delta_safe(Delta(
-                SUSCEPTIBLE,
-                EXPOSED,
+            infect(
                 SCHOOL_CONTACT,
                 pick_with_probability(env_st.people[SUSCEPTIBLE], beta*env_st.people[INFECTED_1].size())
-            ));
+            );
         }
     }
 
@@ -123,84 +164,100 @@ class SeirSimulation{
             const double sqrtdensity = sqrt(state.population.nearest_densities[i]);
             for(const auto j: state.population.nearests_zones[i]){
                 const auto &env_st2 = state.get_environments(NEIGHBOURHOOD)[j];
-                add_delta_safe(Delta(
-                    SUSCEPTIBLE,
-                    EXPOSED,
+                infect(
                     NEIGHBOURHOOD_CONTACT,
                     pick_with_probability(env_st.people[SUSCEPTIBLE], beta*sqrtdensity*env_st2.people[INFECTED_1].size())
-                ));
+                );
             }
         }
     }
 
     void inter_province_contact_step(){
         auto &env_st = state.get_environments(COUNTRY)[0];
-        add_delta_safe(Delta(
-            SUSCEPTIBLE,
-            EXPOSED,
+        infect(
             INTER_PROVINCE_CONTACT,
             pick_with_probability(env_st.people[SUSCEPTIBLE], parameters["inter_province_contact_probability"].get<double>()*env_st.people[INFECTED_1].size())
-        ));
+        );
     }
 
-    void cases_evolution_step(){
-        for(int age=0; age<=state.population.max_age; age++){
-            add_delta_safe(Delta(
-                EXPOSED,
-                INFECTED_1,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[EXPOSED], parameters["fraction_become_mild"].get<double>())
-            ));
-
-            add_delta_safe(Delta(
-                INFECTED_1,
-                RECOVERED,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], parameters["fraction_recover_from_mild"].get<double>())
-            ));
-            add_delta_safe(Delta(
-                INFECTED_1,
-                INFECTED_2,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_1], parameters["fraction_severe_from_mild"].get<double>())
-            ));
-
-            add_delta_safe(Delta(
-                INFECTED_2,
-                RECOVERED,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], parameters["fraction_recover_from_severe"].get<double>())
-            ));
-            add_delta_safe(Delta(
-                INFECTED_2,
-                INFECTED_3,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_2], parameters["fraction_critical_from_severe"].get<double>())
-            ));
-
-            add_delta_safe(Delta(
-                INFECTED_3,
-                RECOVERED,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], parameters["fraction_recover_from_critical"].get<double>())
-            ));
-            add_delta_safe(Delta(
-                INFECTED_3,
-                DEAD,
-                UNDEFINED,
-                pick_with_probability(state.get_environments(BY_AGE)[age].people[INFECTED_3], parameters["fraction_death_from_critical"].get<double>())
-            ));
+    void prepare_future_transitions(const PersonState &st, const vector<PersonId> &lst){
+        switch(st){
+        case EXPOSED: {
+            future_transitions.push(Delta(
+                    EXPOSED,
+                    INFECTED_1,
+                    UNDEFINED,
+                    lst
+            ), round(parameters["incubation_period"].get<double>()));
+            break;
+        }
+        case INFECTED_1: {
+            auto recovered = pick_with_probability(lst, parameters["fraction_mild"].get<double>());
+            future_transitions.push(Delta(
+                    INFECTED_1,
+                    RECOVERED,
+                    UNDEFINED,
+                    recovered
+            ), round(parameters["duration_mild_infection"].get<double>()));
+            future_transitions.push(Delta(
+                    INFECTED_1,
+                    INFECTED_2,
+                    UNDEFINED,
+                    stable_difference(lst, recovered)
+            ), round(parameters["duration_mild_infection"].get<double>()));
+            break;
+        }
+        case INFECTED_2: {
+            auto recovered2 = pick_with_probability(lst, parameters["fraction_severe"].get<double>());
+            future_transitions.push(Delta(
+                    INFECTED_2,
+                    RECOVERED,
+                    UNDEFINED,
+                    recovered2
+            ), round(parameters["duration_hospitalization"].get<double>()));
+            future_transitions.push(Delta(
+                    INFECTED_2,
+                    INFECTED_3,
+                    UNDEFINED,
+                    stable_difference(lst, recovered2)
+            ), round(parameters["duration_hospitalization"].get<double>()));
+            break;
+        }
+        case INFECTED_3: {
+            auto recovered3 = pick_with_probability(lst, parameters["CFR"].get<double>()/parameters["fraction_critical"].get<double>());
+            future_transitions.push(Delta(
+                    INFECTED_3,
+                    RECOVERED,
+                    UNDEFINED,
+                    recovered3
+            ), round(parameters["time_ICU_death"].get<double>()));
+            future_transitions.push(Delta(
+                    INFECTED_3,
+                    DEAD,
+                    UNDEFINED,
+                    stable_difference(lst, recovered3)
+            ), round(parameters["time_ICU_death"].get<double>()));
+            break;
+        }
+        case SUSCEPTIBLE:
+        case RECOVERED:
+        case DEAD:
+        case PERSON_STATE_COUNT:
+            break;
         }
     }
 
     void run_steps(unsigned day){
         deltas.clear();
+        for(const Delta& d: future_transitions.pop()){
+            d.apply(state, state_trans_by_zone);
+            prepare_future_transitions(d.dst, d.lst);
+        }
         introduce_new_cases_step(day);
         home_contact_step();
         school_contact_step();
         neighbourhood_contact_step();
         inter_province_contact_step();
-        cases_evolution_step();
         for(const Delta& d: deltas){
             d.apply(state, state_trans_by_zone);
         }
@@ -259,12 +316,13 @@ class SeirSimulation{
     }
 
 public:
-    SeirSimulation(Population population, const SimulationParameters &parameters, const unsigned int seed=0): state(population), parameters(parameters), generator(seed? seed : random_device{}()) {
+    SeirSimulation(Population population, const SimulationParameters &parameters, const unsigned int seed=0): state(population), random_probability(0, 1), parameters(parameters), generator(seed? seed : random_device{}()) {
         assert(TRANSITION_REASONS_COUNT == sizeof(transition_reason_text)/sizeof(transition_reason_text[0]));
     }
 
     void run(unsigned days, const string &json_filename, const ProgressBar::ShowMode progress_mode=ProgressBar::DEFAULT){
         state.reset();
+        future_transitions.clear();
         json report = create_empty_report();
         LOG(info) << "Starting simulation...";
         ProgressBar progressBar(days, progress_mode);
