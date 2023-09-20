@@ -111,6 +111,11 @@ def store_censo():
     if not os.path.exists(hdf):
         gen_censo_db.store_all(censo_dir, hdf)
 
+def store_covidar():
+    dst = os.path.join(DATA_DIR, 'covid19ardata.csv')
+    url = 'https://docs.google.com/spreadsheets/d/16-bnsDdmmgtSxdWbVMboIHo5FRuz76DBxsz_BbsEVWA/export?format=csv&id=16-bnsDdmmgtSxdWbVMboIHo5FRuz76DBxsz_BbsEVWA&gid=0'
+    download_url(url, dst)
+
 def store_all():
     ensure_dir_exists(DATA_DIR)
     store_indec()
@@ -119,6 +124,7 @@ def store_all():
     store_schools()
     store_transporte()
     store_fake_population()
+    store_covidar()
 
 if __name__ == "__main__":
     store_all()
